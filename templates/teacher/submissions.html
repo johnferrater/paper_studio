@@ -1,0 +1,66 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Student Submissions · Paper Studio{% endblock %}
+{% block role %}TEACHER{% endblock %}
+{% block nav %}
+  <a class="nav-link" href="{% url 'teacher_dashboard' %}">Overview</a>
+  <a class="nav-link" href="#">Assigned Projects</a>
+  <a class="nav-link active" href="{% url 'teacher_submissions' %}">Student Submissions</a>
+  <a class="nav-link" href="#">Chapter Reviews</a>
+  <a class="nav-link" href="#">Feedback</a>
+  <a class="nav-link" href="#">Research Progress</a>
+  <a class="nav-link" href="#">Notifications</a>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Student Submissions</h1>
+    <p class="page-sub">Chapters waiting for your review</p>
+  </div>
+</div>
+
+<div class="submissions-grid">
+  <section class="surface">
+    <h2 class="card-title">Assigned projects</h2>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Project</th>
+            <th scope="col">Members</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>[Research Title]</td>
+            <td>[Group]</td>
+            <td><span class="badge badge-amber">For review</span></td>
+          </tr>
+          <tr>
+            <td>[Research Title]</td>
+            <td>[Group]</td>
+            <td><span class="badge badge-blue">In progress</span></td>
+          </tr>
+          <tr>
+            <td>[Research Title]</td>
+            <td>[Group]</td>
+            <td><span class="badge badge-red">Revision required</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface">
+    <h2 class="card-title">Review</h2>
+    <p class="review-meta">Chapter 2 &middot; Related Literature &middot; Version [n]</p>
+    <div class="locked-snapshot">[Submitted chapter text appears here as a locked snapshot]</div>
+    <label for="feedback" class="sr-only">Write feedback</label>
+    <textarea id="feedback" class="textarea" placeholder="Write feedback"></textarea>
+    <div class="review-actions">
+      <button type="button" class="btn-accent">Approve</button>
+      <button type="button" class="btn-outline">Request revision</button>
+    </div>
+  </section>
+</div>
+{% endblock %}

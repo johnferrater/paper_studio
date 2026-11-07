@@ -2,13 +2,124 @@
 {% block title %}Admin · Paper Studio{% endblock %}
 {% block role %}ADMINISTRATOR{% endblock %}
 {% block nav %}
-  <a class="nav-link active" href="#">Overview</a>
+  <a class="nav-link active" href="{% url 'admin_dashboard' %}">Overview</a>
   <a class="nav-link" href="{% url 'admin:index' %}">User Management</a>
   <a class="nav-link" href="#">System Reports</a>
   <a class="nav-link" href="#">Activity Logs</a>
 {% endblock %}
 {% block content %}
-  <h1 class="h3" style="color: var(--navy);">Overview</h1>
-  <p class="text-secondary">Welcome, {{ request.user.first_name|default:request.user.username }}.</p>
-  <div class="card p-4"><strong>Platform statistics will appear here.</strong></div>
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Overview</h1>
+    <p class="page-sub">Platform at a glance</p>
+  </div>
+  <a href="{% url 'admin:index' %}" class="btn-accent">Open Django admin</a>
+</div>
+
+<div class="overview-grid">
+  <section class="surface span-5">
+    <h2 class="card-title">Platform summary</h2>
+    <div class="meta-list">
+      <div class="meta-row">
+        <span class="meta-label">Total users</span>
+        <span class="meta-value">12</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Students</span>
+        <span class="meta-value">8</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Teachers</span>
+        <span class="meta-value">3</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Administrators</span>
+        <span class="meta-value">1</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="surface span-7">
+    <div class="card-head">
+      <h2 class="card-title">Recent activity</h2>
+      <a href="#" class="card-link">View log</a>
+    </div>
+    <div class="list-divide">
+      <div class="list-row">
+        <div class="list-main">
+          <p class="list-title">New student registered</p>
+          <p class="list-sub">2 hours ago</p>
+        </div>
+        <span class="badge badge-blue">Account</span>
+      </div>
+      <div class="list-row">
+        <div class="list-main">
+          <p class="list-title">Chapter approved by teacher</p>
+          <p class="list-sub">5 hours ago</p>
+        </div>
+        <span class="badge badge-green">Review</span>
+      </div>
+      <div class="list-row">
+        <div class="list-main">
+          <p class="list-title">Course created</p>
+          <p class="list-sub">Yesterday</p>
+        </div>
+        <span class="badge badge-gray">Course</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="surface span-7">
+    <div class="card-head">
+      <h2 class="card-title">User management</h2>
+      <a href="{% url 'admin:index' %}" class="card-link">Manage users</a>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">User</th>
+            <th scope="col">Role</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>student</td>
+            <td>Student</td>
+            <td><span class="badge badge-green">Active</span></td>
+          </tr>
+          <tr>
+            <td>teacher</td>
+            <td>Teacher</td>
+            <td><span class="badge badge-green">Active</span></td>
+          </tr>
+          <tr>
+            <td>Admin</td>
+            <td>Administrator</td>
+            <td><span class="badge badge-green">Active</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="surface span-5">
+    <h2 class="card-title">System status</h2>
+    <div class="list-divide">
+      <div class="list-row">
+        <span>Database</span>
+        <span class="badge badge-green">Operational</span>
+      </div>
+      <div class="list-row">
+        <span>Email service</span>
+        <span class="badge badge-green">Operational</span>
+      </div>
+      <div class="list-row">
+        <span>AI assistant</span>
+        <span class="badge badge-amber">Degraded</span>
+      </div>
+    </div>
+  </section>
+</div>
 {% endblock %}

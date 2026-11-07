@@ -4,12 +4,93 @@
 {% block nav %}
   <a class="nav-link active" href="#">Overview</a>
   <a class="nav-link" href="#">My Research</a>
+  <a class="nav-link" href="#">Group Workspace</a>
   <a class="nav-link" href="#">AI Assistant</a>
+  <a class="nav-link" href="#">Source Finder</a>
+  <a class="nav-link" href="#">RRL Organizer</a>
   <a class="nav-link" href="#">Writing Workspace</a>
+  <a class="nav-link" href="#">References</a>
   <a class="nav-link" href="#">Notifications</a>
 {% endblock %}
 {% block content %}
-  <h1 class="h3" style="color: var(--navy);">Overview</h1>
-  <p class="text-secondary">Welcome, {{ request.user.first_name|default:request.user.username }}.</p>
-  <div class="card p-4"><strong>Your research projects will appear here.</strong></div>
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Overview</h1>
+    <p class="page-sub">Your research at a glance</p>
+  </div>
+  <a href="#" class="btn-accent">New research project</a>
+</div>
+
+<div class="overview-grid">
+  <section class="surface span-5">
+    <h2 class="card-title">Current project</h2>
+    <h3 class="project-title">[Research Title]</h3>
+    <span class="badge badge-purple">In progress</span>
+    <div class="meta-list">
+      <div class="meta-row">
+        <span class="meta-label">Adviser</span>
+        <span class="meta-value">[Teacher name]</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Members</span>
+        <span class="meta-value">[Group members]</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Deadline</span>
+        <span class="meta-value">[Date]</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="surface span-7">
+    <h2 class="card-title">Chapters</h2>
+    <div class="list-divide">
+      <div class="list-row">
+        <span>Chapter 1 &middot; Introduction</span>
+        <span class="badge badge-green">Approved</span>
+      </div>
+      <div class="list-row">
+        <span>Chapter 2 &middot; Related Literature</span>
+        <span class="badge badge-amber">For review</span>
+      </div>
+      <div class="list-row">
+        <span>Chapter 3 &middot; Methodology</span>
+        <span class="badge badge-gray">Draft</span>
+      </div>
+      <div class="list-row">
+        <span>Chapter 4 &middot; Results and Discussion</span>
+        <span class="badge badge-gray">Draft</span>
+      </div>
+      <div class="list-row">
+        <span>Chapter 5 &middot; Conclusions</span>
+        <span class="badge badge-gray">Draft</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="surface span-7">
+    <h2 class="card-title">AI Assistant</h2>
+    <div class="chat">
+      <div class="chat-row chat-user">
+        <div class="chat-bubble">Help me refine my research questions.</div>
+      </div>
+      <div class="chat-row chat-bot">
+        <div class="chat-bubble">Using your title and Chapter 1 draft, here are three directions to consider. AI suggestions are not verified sources.</div>
+      </div>
+    </div>
+    <form method="get" action="" class="chat-form">
+      <input type="text" name="q" class="input" placeholder="Ask about your research" aria-label="Ask about your research">
+      <button type="submit" class="btn-accent">Send</button>
+    </form>
+  </section>
+
+  <section class="surface span-5">
+    <h2 class="card-title">Notifications</h2>
+    <div class="list-divide">
+      <div class="list-row"><span>Teacher feedback on Chapter 2</span></div>
+      <div class="list-row"><span>Group task due soon</span></div>
+      <div class="list-row"><span>Invitation to join a project</span></div>
+    </div>
+  </section>
+</div>
 {% endblock %}

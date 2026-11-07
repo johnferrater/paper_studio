@@ -42,5 +42,9 @@ class TeacherDashboardView(TeacherRequiredMixin, TemplateView):
     template_name = "teacher/dashboard.html"
 
 
+class TeacherSubmissionsView(TeacherRequiredMixin, TemplateView):
+    template_name = "teacher/submissions.html"
+
+
 class AdminDashboardView(AdminRequiredMixin, TemplateView):
     template_name = "admin_panel/dashboard.html"

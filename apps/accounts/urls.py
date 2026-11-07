@@ -9,5 +9,6 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(), name="logout"),
     path("student/", views.StudentDashboardView.as_view(), name="student_dashboard"),
     path("teacher/", views.TeacherDashboardView.as_view(), name="teacher_dashboard"),
+    path("teacher/submissions/", views.TeacherSubmissionsView.as_view(), name="teacher_submissions"),
     path("manage/", views.AdminDashboardView.as_view(), name="admin_dashboard"),
 ]
