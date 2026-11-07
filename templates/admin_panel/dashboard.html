@@ -1,0 +1,14 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Admin · Paper Studio{% endblock %}
+{% block role %}ADMINISTRATOR{% endblock %}
+{% block nav %}
+  <a class="nav-link active" href="#">Overview</a>
+  <a class="nav-link" href="{% url 'admin:index' %}">User Management</a>
+  <a class="nav-link" href="#">System Reports</a>
+  <a class="nav-link" href="#">Activity Logs</a>
+{% endblock %}
+{% block content %}
+  <h1 class="h3" style="color: var(--navy);">Overview</h1>
+  <p class="text-secondary">Welcome, {{ request.user.first_name|default:request.user.username }}.</p>
+  <div class="card p-4"><strong>Platform statistics will appear here.</strong></div>
+{% endblock %}

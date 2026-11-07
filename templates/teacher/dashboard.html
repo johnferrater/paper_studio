@@ -1,0 +1,15 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Teacher · Paper Studio{% endblock %}
+{% block role %}TEACHER{% endblock %}
+{% block nav %}
+  <a class="nav-link active" href="#">Overview</a>
+  <a class="nav-link" href="#">Assigned Projects</a>
+  <a class="nav-link" href="#">Student Submissions</a>
+  <a class="nav-link" href="#">Feedback</a>
+  <a class="nav-link" href="#">Notifications</a>
+{% endblock %}
+{% block content %}
+  <h1 class="h3" style="color: var(--navy);">Overview</h1>
+  <p class="text-secondary">Welcome, {{ request.user.first_name|default:request.user.username }}.</p>
+  <div class="card p-4"><strong>Projects assigned to you will appear here.</strong></div>
+{% endblock %}

@@ -1,0 +1,10 @@
+:root { --navy: #0B1F3A; --violet: #5B3FD6; --bg: #F5F7FA; }
+body { background: var(--bg); font-family: Inter, system-ui, sans-serif; color: #1F2D45; }
+.sidebar { width: 240px; flex: none; background: var(--navy); color: #C9D6EA; }
+.brand { color: #fff; font-weight: 700; letter-spacing: .08em; }
+.role-label { font-size: .7rem; letter-spacing: .1em; color: #8FA6C8; margin-bottom: .5rem; }
+.sidebar .nav-link { color: #C9D6EA; border-radius: 10px; }
+.sidebar .nav-link.active { background: var(--violet); color: #fff; font-weight: 600; }
+.btn-primary { background: var(--violet); border-color: var(--violet); }
+.btn-primary:hover, .btn-primary:focus { background: #4B31B8; border-color: #4B31B8; }
+.card { border-radius: 16px; border-color: #E3E8F0; }

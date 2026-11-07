@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="d-flex min-vh-100">
+  <aside class="sidebar p-3 d-flex flex-column">
+    <div class="brand mb-4 px-2">PAPER STUDIO</div>
+    <div class="role-label px-2">{% block role %}{% endblock %}</div>
+    <nav class="nav flex-column gap-1 flex-grow-1">{% block nav %}{% endblock %}</nav>
+    <div class="small px-2 mb-2">{{ request.user.get_full_name|default:request.user.username }}</div>
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-light btn-sm w-100">Log out</button>
+    </form>
+  </aside>
+  <main class="flex-grow-1 p-4">{% block content %}{% endblock %}</main>
+</div>
+{% endblock %}

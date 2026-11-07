@@ -1,0 +1,15 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Student · Paper Studio{% endblock %}
+{% block role %}STUDENT{% endblock %}
+{% block nav %}
+  <a class="nav-link active" href="#">Overview</a>
+  <a class="nav-link" href="#">My Research</a>
+  <a class="nav-link" href="#">AI Assistant</a>
+  <a class="nav-link" href="#">Writing Workspace</a>
+  <a class="nav-link" href="#">Notifications</a>
+{% endblock %}
+{% block content %}
+  <h1 class="h3" style="color: var(--navy);">Overview</h1>
+  <p class="text-secondary">Welcome, {{ request.user.first_name|default:request.user.username }}.</p>
+  <div class="card p-4"><strong>Your research projects will appear here.</strong></div>
+{% endblock %}
