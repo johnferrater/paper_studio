@@ -1,0 +1,46 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Group workspace · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Group workspace</h1>
+    <p class="page-sub">Join a project group or manage your memberships</p>
+  </div>
+</div>
+
+<section class="surface">
+  {% if rows %}
+    <div class="list-divide">
+      {% for row in rows %}
+        <div class="list-row">
+          <div class="list-main">
+            <p class="list-title"><a class="btn-link" href="{{ row.project.get_absolute_url }}">{{ row.project.title }}</a></p>
+            <p class="list-sub">
+              Owner {{ row.project.owner.get_full_name|default:row.project.owner.username }}
+              &middot; {{ row.member_count }} member{{ row.member_count|pluralize }}
+            </p>
+          </div>
+          <span class="badge {{ row.project.badge_class }}">{{ row.project.get_status_display }}</span>
+          {% if row.is_owner %}
+            <span class="badge badge-purple">Leader</span>
+          {% elif row.is_member %}
+            <form method="post" action="{% url 'collaboration:leave' row.project.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-link">Leave</button>
+            </form>
+          {% elif request.user.role == "STUDENT" %}
+            <form method="post" action="{% url 'collaboration:join' row.project.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-link">Join</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="page-sub">No projects available to join.</p>
+  {% endif %}
+</section>
+{% endblock %}

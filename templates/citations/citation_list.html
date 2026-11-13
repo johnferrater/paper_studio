@@ -1,0 +1,29 @@
+{% extends "base_dashboard.html" %}
+{% block title %}References · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">References</h1>
+    <p class="page-sub">Formatted citations across your projects</p>
+  </div>
+</div>
+
+<section class="surface">
+  {% if citations %}
+    <div class="list-divide">
+      {% for citation in citations %}
+        <div class="list-row">
+          <div class="list-main">
+            <p class="list-title">{{ citation.formatted_text }}</p>
+            <p class="list-sub">{{ citation.get_style_display }} &middot; <a class="btn-link" href="{{ citation.project.get_absolute_url }}">{{ citation.project.title }}</a></p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="page-sub">No references yet. Add one from a research project.</p>
+  {% endif %}
+</section>
+{% endblock %}

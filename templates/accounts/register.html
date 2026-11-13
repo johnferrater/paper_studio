@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Create account · Paper Studio{% endblock %}
+{% block body %}
+<div class="login-shell">
+  <section class="login-hero">
+    <div class="login-hero-brand">PAPER STUDIO</div>
+    <div class="login-hero-body">
+      <h1>Start your research journey.</h1>
+      <p>Create a student account to plan projects, organize sources, and write with your group.</p>
+    </div>
+    <div class="login-hero-foot">Teacher accounts are created by an administrator</div>
+  </section>
+
+  <section class="login-panel">
+    <form method="post" class="login-card">
+      {% csrf_token %}
+      <h2 class="login-title">Create account</h2>
+      <p class="login-sub">Sign up as a student.</p>
+
+      {% if form.non_field_errors %}
+        <div class="login-alert" role="alert">{{ form.non_field_errors|join:" " }}</div>
+      {% endif %}
+
+      {% for field in form %}
+        <div class="login-field">
+          <label for="{{ field.id_for_label }}" class="login-label">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="field-help">{{ field.help_text|safe }}</p>{% endif %}
+          {% if field.errors %}<p class="field-error">{{ field.errors|join:" " }}</p>{% endif %}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="login-submit">Create account</button>
+      <p class="login-alt">Already have an account? <a href="{% url 'login' %}">Sign in</a>.</p>
+    </form>
+  </section>
+</div>
+{% endblock %}

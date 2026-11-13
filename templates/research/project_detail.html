@@ -1,0 +1,148 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ project.title }} · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">{{ project.title }}</h1>
+    <p class="page-sub">
+      <span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span>
+    </p>
+  </div>
+  <div class="head-actions">
+    <a href="{% url 'research:chapter_create' project.pk %}" class="btn-outline">Add chapter</a>
+    <a href="{% url 'assistant:chat' project.pk %}" class="btn-outline">AI assistant</a>
+    <a href="{% url 'sources:source_create' project.pk %}" class="btn-accent">Add source</a>
+  </div>
+</div>
+
+<div class="overview-grid">
+  <section class="surface span-5">
+    <h2 class="card-title">Project</h2>
+    {% if project.abstract %}<p class="page-sub">{{ project.abstract }}</p>{% endif %}
+    <div class="meta-list">
+      <div class="meta-row">
+        <span class="meta-label">Owner</span>
+        <span class="meta-value">{{ project.owner.get_full_name|default:project.owner.username }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Adviser</span>
+        <span class="meta-value">{{ project.adviser.get_full_name|default:project.adviser.username|default:"Unassigned" }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Deadline</span>
+        <span class="meta-value">{{ project.deadline|default:"Not set" }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Last updated</span>
+        <span class="meta-value">{{ project.updated_at|date:"M j, Y" }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="surface span-7">
+    <div class="card-head">
+      <h2 class="card-title">Chapters</h2>
+      <a href="{% url 'research:chapter_create' project.pk %}" class="card-link">Add chapter</a>
+    </div>
+    {% if chapters %}
+      <div class="list-divide">
+        {% for chapter in chapters %}
+          <div class="list-row">
+            <div class="list-main">
+              <p class="list-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
+              <p class="list-sub">{{ chapter.drafts.count }} draft{{ chapter.drafts.count|pluralize }}</p>
+            </div>
+            <span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span>
+            <a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn-link">Write</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="page-sub">No chapters yet. Add one to start writing.</p>
+    {% endif %}
+  </section>
+
+  <section class="surface span-7">
+    <div class="card-head">
+      <h2 class="card-title">Sources</h2>
+      <a href="{% url 'sources:source_list' %}" class="card-link">All sources ({{ project.sources.count }})</a>
+    </div>
+    {% if sources %}
+      <div class="list-divide">
+        {% for source in sources %}
+          <div class="list-row">
+            <div class="list-main">
+              <p class="list-title">{{ source.title }}</p>
+              <p class="list-sub">{{ source.authors }}{% if source.year %} &middot; {{ source.year }}{% endif %} &middot; {{ source.get_source_type_display }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="page-sub">No sources yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="surface span-5">
+    <div class="card-head">
+      <h2 class="card-title">Group</h2>
+      {% if request.user.role == "STUDENT" %}
+        {% if is_member %}
+          <form method="post" action="{% url 'collaboration:leave' project.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-link">Leave</button>
+          </form>
+        {% elif not is_owner %}
+          <form method="post" action="{% url 'collaboration:join' project.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-link">Join group</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    </div>
+    <div class="list-divide">
+      <div class="list-row">
+        <span>{{ project.owner.get_full_name|default:project.owner.username }}</span>
+        <span class="badge badge-purple">Leader</span>
+      </div>
+      {% for membership in memberships %}
+        <div class="list-row">
+          <span>{{ membership.user.get_full_name|default:membership.user.username }}</span>
+          <span class="badge badge-gray">{{ membership.get_role_display }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="surface span-7">
+    <div class="card-head">
+      <h2 class="card-title">References</h2>
+      <a href="{% url 'citations:citation_create' project.pk %}" class="card-link">Add reference</a>
+    </div>
+    {% if citations %}
+      <div class="list-divide">
+        {% for citation in citations %}
+          <div class="list-row">
+            <div class="list-main">
+              <p class="list-title">{{ citation.source.title }}</p>
+              <p class="list-sub">{{ citation.get_style_display }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="page-sub">No references yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="surface span-5">
+    <h2 class="card-title">Writing</h2>
+    <p class="page-sub">Open a chapter to draft, save versions, and submit for review.</p>
+    <div class="form-actions">
+      <a href="{% url 'writing:index' %}" class="btn-outline">Open writing workspace</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

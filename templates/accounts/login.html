@@ -32,9 +32,9 @@
         <input type="password" name="password" id="id_password" class="login-input" placeholder="Password" autocomplete="current-password" required>
       </div>
 
-      <a href="#" class="forgot-link">Forgot password?</a>
+      <a href="{% url 'password_reset' %}" class="forgot-link">Forgot password?</a>
       <button type="submit" class="login-submit">Sign in</button>
-      <p class="login-alt">New student? <a href="#">Create an account</a>. Teacher accounts are created by an administrator.</p>
+      <p class="login-alt">New student? <a href="{% url 'register' %}">Create an account</a>. Teacher accounts are created by an administrator.</p>
     </form>
   </section>
 </div>

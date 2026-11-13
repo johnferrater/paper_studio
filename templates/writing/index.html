@@ -1,0 +1,43 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Writing workspace · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Writing workspace</h1>
+    <p class="page-sub">Draft chapters and submit them for review</p>
+  </div>
+</div>
+
+<section class="surface">
+  {% if chapters %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Project</th>
+            <th scope="col">Chapter</th>
+            <th scope="col">Status</th>
+            <th scope="col">Drafts</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for chapter in chapters %}
+            <tr>
+              <td>{{ chapter.project.title }}</td>
+              <td>Chapter {{ chapter.number }} &middot; {{ chapter.title }}</td>
+              <td><span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span></td>
+              <td>{{ chapter.drafts.count }}</td>
+              <td><a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn-link">Open</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="page-sub">No chapters to write yet. Add a chapter from a research project.</p>
+  {% endif %}
+</section>
+{% endblock %}

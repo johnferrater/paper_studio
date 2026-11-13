@@ -1,0 +1,30 @@
+{% extends "base_dashboard.html" %}
+{% block title %}AI Assistant · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">AI assistant</h1>
+    <p class="page-sub">Pick a project to chat with the writing assistant</p>
+  </div>
+</div>
+
+<section class="surface">
+  {% if projects %}
+    <div class="list-divide">
+      {% for project in projects %}
+        <div class="list-row">
+          <div class="list-main">
+            <p class="list-title"><a class="btn-link" href="{% url 'assistant:chat' project.pk %}">{{ project.title }}</a></p>
+            <p class="list-sub">{{ project.chapters.count }} chapter{{ project.chapters.count|pluralize }}</p>
+          </div>
+          <a href="{% url 'assistant:chat' project.pk %}" class="btn-link">Open chat</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="page-sub">Create a research project first to use the assistant.</p>
+  {% endif %}
+</section>
+{% endblock %}

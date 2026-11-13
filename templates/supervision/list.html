@@ -1,0 +1,41 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Supervision · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Supervision</h1>
+    <p class="page-sub">Teacher and student research pairings</p>
+  </div>
+</div>
+
+<section class="surface">
+  {% if supervisions %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Teacher</th>
+            <th scope="col">Student</th>
+            <th scope="col">Project</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for supervision in supervisions %}
+            <tr>
+              <td>{{ supervision.teacher.get_full_name|default:supervision.teacher.username }}</td>
+              <td>{{ supervision.student.get_full_name|default:supervision.student.username }}</td>
+              <td>{% if supervision.project %}<a class="btn-link" href="{{ supervision.project.get_absolute_url }}">{{ supervision.project.title }}</a>{% else %}—{% endif %}</td>
+              <td><span class="badge {% if supervision.status == 'ACTIVE' %}badge-green{% else %}badge-gray{% endif %}">{{ supervision.get_status_display }}</span></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="page-sub">No supervision pairings yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

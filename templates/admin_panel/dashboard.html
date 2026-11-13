@@ -1,12 +1,7 @@
 {% extends "base_dashboard.html" %}
 {% block title %}Admin · Paper Studio{% endblock %}
 {% block role %}ADMINISTRATOR{% endblock %}
-{% block nav %}
-  <a class="nav-link active" href="{% url 'admin_dashboard' %}">Overview</a>
-  <a class="nav-link" href="{% url 'admin:index' %}">User Management</a>
-  <a class="nav-link" href="#">System Reports</a>
-  <a class="nav-link" href="#">Activity Logs</a>
-{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
@@ -22,82 +17,74 @@
     <div class="meta-list">
       <div class="meta-row">
         <span class="meta-label">Total users</span>
-        <span class="meta-value">12</span>
+        <span class="meta-value">{{ total_users }}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">Students</span>
-        <span class="meta-value">8</span>
+        <span class="meta-value">{{ students }}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">Teachers</span>
-        <span class="meta-value">3</span>
+        <span class="meta-value">{{ teachers }}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">Administrators</span>
-        <span class="meta-value">1</span>
+        <span class="meta-value">{{ admins }}</span>
+      </div>
+      <div class="meta-row">
+        <span class="meta-label">Research projects</span>
+        <span class="meta-value">{{ project_count }}</span>
       </div>
     </div>
   </section>
 
   <section class="surface span-7">
     <div class="card-head">
-      <h2 class="card-title">Recent activity</h2>
-      <a href="#" class="card-link">View log</a>
+      <h2 class="card-title">Recent projects</h2>
+      <a href="{% url 'research:project_list' %}" class="card-link">View all</a>
     </div>
-    <div class="list-divide">
-      <div class="list-row">
-        <div class="list-main">
-          <p class="list-title">New student registered</p>
-          <p class="list-sub">2 hours ago</p>
-        </div>
-        <span class="badge badge-blue">Account</span>
+    {% if recent_projects %}
+      <div class="list-divide">
+        {% for project in recent_projects %}
+          <div class="list-row">
+            <div class="list-main">
+              <p class="list-title"><a class="btn-link" href="{{ project.get_absolute_url }}">{{ project.title }}</a></p>
+              <p class="list-sub">Owner {{ project.owner.get_full_name|default:project.owner.username }} &middot; updated {{ project.updated_at|date:"M j, Y" }}</p>
+            </div>
+            <span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span>
+          </div>
+        {% endfor %}
       </div>
-      <div class="list-row">
-        <div class="list-main">
-          <p class="list-title">Chapter approved by teacher</p>
-          <p class="list-sub">5 hours ago</p>
-        </div>
-        <span class="badge badge-green">Review</span>
-      </div>
-      <div class="list-row">
-        <div class="list-main">
-          <p class="list-title">Course created</p>
-          <p class="list-sub">Yesterday</p>
-        </div>
-        <span class="badge badge-gray">Course</span>
-      </div>
-    </div>
+    {% else %}
+      <p class="page-sub">No projects yet.</p>
+    {% endif %}
   </section>
 
   <section class="surface span-7">
     <div class="card-head">
-      <h2 class="card-title">User management</h2>
-      <a href="{% url 'admin:index' %}" class="card-link">Manage users</a>
+      <h2 class="card-title">Users by role</h2>
+      <a href="{% url 'admin:accounts_user_changelist' %}" class="card-link">Manage users</a>
     </div>
     <div class="table-wrap">
       <table class="data-table">
         <thead>
           <tr>
-            <th scope="col">User</th>
             <th scope="col">Role</th>
-            <th scope="col">Status</th>
+            <th scope="col">Users</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>student</td>
-            <td>Student</td>
-            <td><span class="badge badge-green">Active</span></td>
+            <td>Students</td>
+            <td>{{ students }}</td>
           </tr>
           <tr>
-            <td>teacher</td>
-            <td>Teacher</td>
-            <td><span class="badge badge-green">Active</span></td>
+            <td>Teachers</td>
+            <td>{{ teachers }}</td>
           </tr>
           <tr>
-            <td>Admin</td>
-            <td>Administrator</td>
-            <td><span class="badge badge-green">Active</span></td>
+            <td>Administrators</td>
+            <td>{{ admins }}</td>
           </tr>
         </tbody>
       </table>
@@ -113,13 +100,25 @@
       </div>
       <div class="list-row">
         <span>Email service</span>
-        <span class="badge badge-green">Operational</span>
+        <span class="badge badge-blue">Console (dev)</span>
       </div>
       <div class="list-row">
         <span>AI assistant</span>
-        <span class="badge badge-amber">Degraded</span>
+        {% if assistant_configured %}
+          <span class="badge badge-green">Configured</span>
+        {% else %}
+          <span class="badge badge-amber">Not configured</span>
+        {% endif %}
       </div>
     </div>
+  </section>
+
+  <section class="surface span-7">
+    <div class="card-head">
+      <h2 class="card-title">Notifications</h2>
+      <a href="{% url 'notifications:list' %}" class="card-link">View all</a>
+    </div>
+    {% include "partials/notification_list.html" %}
   </section>
 </div>
 {% endblock %}

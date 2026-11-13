@@ -1,0 +1,43 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Sources · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Source finder</h1>
+    <p class="page-sub">Every source saved across your projects</p>
+  </div>
+</div>
+
+<section class="surface">
+  {% if sources %}
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Title</th>
+            <th scope="col">Authors</th>
+            <th scope="col">Year</th>
+            <th scope="col">Type</th>
+            <th scope="col">Project</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for source in sources %}
+            <tr>
+              <td>{% if source.url %}<a class="btn-link" href="{{ source.url }}" target="_blank" rel="noopener">{{ source.title }}</a>{% else %}{{ source.title }}{% endif %}</td>
+              <td>{{ source.authors }}</td>
+              <td>{{ source.year|default:"—" }}</td>
+              <td>{{ source.get_source_type_display }}</td>
+              <td><a class="btn-link" href="{{ source.project.get_absolute_url }}">{{ source.project.title }}</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="page-sub">No sources yet. Add one from a research project.</p>
+  {% endif %}
+</section>
+{% endblock %}

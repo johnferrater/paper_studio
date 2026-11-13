@@ -1,0 +1,92 @@
+{% extends "base_dashboard.html" %}
+{% block title %}{{ chapter }} · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</h1>
+    <p class="page-sub">{{ chapter.project.title }} &middot; <span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span></p>
+  </div>
+  <a href="{{ chapter.project.get_absolute_url }}" class="btn-outline">Back to project</a>
+</div>
+
+{% if is_resubmission %}
+  <div class="revision-banner">
+    <div>
+      <strong>Revision required</strong>
+      <p class="page-sub">Your adviser returned this chapter. Read the feedback on the right, update the content, then resubmit for review.</p>
+    </div>
+  </div>
+{% endif %}
+
+<div class="overview-grid">
+  <section class="surface span-7">
+    <div class="card-head">
+      <h2 class="card-title">Chapter content</h2>
+      {% if draft and draft.submitted_at %}
+        <span class="list-sub">Last submitted {{ draft.submitted_at|date:"M j, Y H:i" }}</span>
+      {% endif %}
+    </div>
+
+    {% if can_edit %}
+      {% if draft %}
+        <p class="page-sub">Version {{ draft.version }} &middot; last saved {{ draft.updated_at|date:"M j, Y H:i" }} by {{ draft.author.username }}</p>
+      {% else %}
+        <p class="page-sub">No draft yet. Your first save creates version 1.</p>
+      {% endif %}
+      <form method="post" class="stack-form">
+        {% csrf_token %}
+        <div class="form-field">
+          <label for="{{ form.content.id_for_label }}" class="login-label">{{ form.content.label }}</label>
+          {{ form.content }}
+          {% if form.content.errors %}<p class="field-error">{{ form.content.errors|join:" " }}</p>{% endif %}
+        </div>
+        <div class="form-actions">
+          <button type="submit" name="action" value="save" class="btn-outline">Save draft</button>
+          {% if is_resubmission %}
+            <button type="submit" name="action" value="submit" class="btn-accent">Resubmit for Review</button>
+          {% else %}
+            <button type="submit" name="action" value="submit" class="btn-accent">Submit for review</button>
+          {% endif %}
+        </div>
+      </form>
+    {% else %}
+      {% if draft %}
+        <div class="locked-snapshot" style="white-space: pre-line;">{{ draft.content }}</div>
+      {% else %}
+        <p class="page-sub">No content has been saved for this chapter yet.</p>
+      {% endif %}
+      {% if is_owner %}
+        <p class="page-sub">This chapter is locked while it is {{ chapter.get_status_display|lower }}.</p>
+      {% else %}
+        <p class="page-sub">Only the chapter owner can edit this content.</p>
+      {% endif %}
+    {% endif %}
+  </section>
+
+  <section class="surface span-5">
+    <h2 class="card-title">Review history</h2>
+    {% if reviews %}
+      <div class="list-divide">
+        {% for review in reviews %}
+          <div class="history-row">
+            <div class="history-head">
+              <span class="badge {% if review.decision == 'APPROVED' %}badge-green{% else %}badge-red{% endif %}">{{ review.get_decision_display }}</span>
+              <strong>{{ review.reviewer.get_full_name|default:review.reviewer.username }}</strong>
+              <span class="list-sub">{{ review.created_at|date:"M j, Y H:i" }}</span>
+            </div>
+            {% if review.feedback %}
+              <p class="page-sub">{{ review.feedback|linebreaksbr }}</p>
+            {% else %}
+              <p class="list-sub">No written feedback.</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="page-sub">No review feedback yet. Submit this chapter to your adviser.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

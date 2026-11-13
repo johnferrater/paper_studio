@@ -1,0 +1,37 @@
+{% url 'student_dashboard' as student_home %}
+{% url 'teacher_dashboard' as teacher_home %}
+{% url 'admin_dashboard' as admin_home %}
+{% url 'research:project_list' as research_list %}
+{% url 'collaboration:index' as collab_index %}
+{% url 'assistant:index' as assistant_index %}
+{% url 'sources:source_list' as source_list %}
+{% url 'citations:citation_list' as citation_list %}
+{% url 'writing:index' as writing_index %}
+{% url 'notifications:list' as notifications_list %}
+{% url 'analytics:dashboard' as analytics_dashboard %}
+{% url 'teacher_submissions' as submissions %}
+{% url 'admin:index' as django_admin %}
+
+{% if request.user.role == "STUDENT" %}
+  <a class="nav-link {% if request.resolver_match.view_name == 'student_dashboard' %}active{% endif %}" href="{{ student_home }}">Overview</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'research:project_list' %}active{% endif %}" href="{{ research_list }}">My Research</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'collaboration:index' %}active{% endif %}" href="{{ collab_index }}">Group Workspace</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'assistant:index' %}active{% endif %}" href="{{ assistant_index }}">AI Assistant</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'sources:source_list' %}active{% endif %}" href="{{ source_list }}">Source Finder</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'writing:index' %}active{% endif %}" href="{{ writing_index }}">Writing Workspace</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'citations:citation_list' %}active{% endif %}" href="{{ citation_list }}">References</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'notifications:list' %}active{% endif %}" href="{{ notifications_list }}">Notifications</a>
+{% elif request.user.role == "TEACHER" %}
+  <a class="nav-link {% if request.resolver_match.view_name == 'teacher_dashboard' %}active{% endif %}" href="{{ teacher_home }}">Overview</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'research:project_list' %}active{% endif %}" href="{{ research_list }}">Assigned Projects</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'teacher_submissions' %}active{% endif %}" href="{{ submissions }}">Student Submissions</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'writing:index' %}active{% endif %}" href="{{ writing_index }}">Chapter Reviews</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'analytics:dashboard' %}active{% endif %}" href="{{ analytics_dashboard }}">Research Progress</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'notifications:list' %}active{% endif %}" href="{{ notifications_list }}">Notifications</a>
+{% else %}
+  <a class="nav-link {% if request.resolver_match.view_name == 'admin_dashboard' %}active{% endif %}" href="{{ admin_home }}">Overview</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'research:project_list' %}active{% endif %}" href="{{ research_list }}">Research</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'analytics:dashboard' %}active{% endif %}" href="{{ analytics_dashboard }}">Analytics</a>
+  <a class="nav-link" href="{{ django_admin }}">User Management</a>
+  <a class="nav-link {% if request.resolver_match.view_name == 'notifications:list' %}active{% endif %}" href="{{ notifications_list }}">Notifications</a>
+{% endif %}

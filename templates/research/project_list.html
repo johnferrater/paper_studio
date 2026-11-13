@@ -1,0 +1,37 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Research · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Research</h1>
+    <p class="page-sub">Projects you own, advise, or collaborate on</p>
+  </div>
+  {% if request.user.role == "STUDENT" %}
+    <a href="{% url 'research:project_create' %}" class="btn-accent">New project</a>
+  {% endif %}
+</div>
+
+<section class="surface">
+  {% if projects %}
+    <div class="list-divide">
+      {% for project in projects %}
+        <div class="list-row">
+          <div class="list-main">
+            <p class="list-title"><a class="btn-link" href="{{ project.get_absolute_url }}">{{ project.title }}</a></p>
+            <p class="list-sub">
+              Owner {{ project.owner.get_full_name|default:project.owner.username }}
+              &middot; {{ project.chapters.count }} chapter{{ project.chapters.count|pluralize }}
+              {% if project.deadline %}&middot; due {{ project.deadline }}{% endif %}
+            </p>
+          </div>
+          <span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="page-sub">No projects yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

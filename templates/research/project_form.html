@@ -1,0 +1,33 @@
+{% extends "base_dashboard.html" %}
+{% block title %}New project · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">New research project</h1>
+    <p class="page-sub">Give your paper a working title to get started</p>
+  </div>
+  <a href="{% url 'research:project_list' %}" class="btn-outline">Back</a>
+</div>
+
+<section class="surface form-surface">
+  <form method="post" class="stack-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="login-alert" role="alert">{{ form.non_field_errors|join:" " }}</div>
+    {% endif %}
+    {% for field in form %}
+      <div class="form-field">
+        <label for="{{ field.id_for_label }}" class="login-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<p class="field-error">{{ field.errors|join:" " }}</p>{% endif %}
+      </div>
+    {% endfor %}
+    <div class="form-actions">
+      <button type="submit" class="btn-accent">Create project</button>
+      <a href="{% url 'research:project_list' %}" class="btn-outline">Cancel</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

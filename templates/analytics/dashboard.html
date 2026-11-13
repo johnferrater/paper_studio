@@ -1,0 +1,46 @@
+{% extends "base_dashboard.html" %}
+{% block title %}Analytics · Paper Studio{% endblock %}
+{% block role %}{{ request.user.role }}{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Analytics</h1>
+    <p class="page-sub">Platform research activity at a glance</p>
+  </div>
+</div>
+
+<div class="overview-grid">
+  <section class="surface span-5">
+    <h2 class="card-title">Totals</h2>
+    <div class="meta-list">
+      <div class="meta-row"><span class="meta-label">Projects</span><span class="meta-value">{{ project_count }}</span></div>
+      <div class="meta-row"><span class="meta-label">Users</span><span class="meta-value">{{ user_count }}</span></div>
+      <div class="meta-row"><span class="meta-label">Sources</span><span class="meta-value">{{ source_count }}</span></div>
+      <div class="meta-row"><span class="meta-label">Citations</span><span class="meta-value">{{ citation_count }}</span></div>
+    </div>
+  </section>
+
+  <section class="surface span-7">
+    <h2 class="card-title">Projects by status</h2>
+    <div class="list-divide">
+      {% for row in projects_by_status %}
+        <div class="list-row"><span>{{ row.label }}</span><span class="meta-value">{{ row.total }}</span></div>
+      {% empty %}
+        <div class="list-row"><span>No projects yet.</span></div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="surface span-7">
+    <h2 class="card-title">Users by role</h2>
+    <div class="list-divide">
+      {% for row in users_by_role %}
+        <div class="list-row"><span>{{ row.label }}</span><span class="meta-value">{{ row.total }}</span></div>
+      {% empty %}
+        <div class="list-row"><span>No users yet.</span></div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

@@ -1,15 +1,7 @@
 {% extends "base_dashboard.html" %}
 {% block title %}Student Submissions · Paper Studio{% endblock %}
 {% block role %}TEACHER{% endblock %}
-{% block nav %}
-  <a class="nav-link" href="{% url 'teacher_dashboard' %}">Overview</a>
-  <a class="nav-link" href="#">Assigned Projects</a>
-  <a class="nav-link active" href="{% url 'teacher_submissions' %}">Student Submissions</a>
-  <a class="nav-link" href="#">Chapter Reviews</a>
-  <a class="nav-link" href="#">Feedback</a>
-  <a class="nav-link" href="#">Research Progress</a>
-  <a class="nav-link" href="#">Notifications</a>
-{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
@@ -20,47 +12,61 @@
 
 <div class="submissions-grid">
   <section class="surface">
-    <h2 class="card-title">Assigned projects</h2>
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th scope="col">Project</th>
-            <th scope="col">Members</th>
-            <th scope="col">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>[Research Title]</td>
-            <td>[Group]</td>
-            <td><span class="badge badge-amber">For review</span></td>
-          </tr>
-          <tr>
-            <td>[Research Title]</td>
-            <td>[Group]</td>
-            <td><span class="badge badge-blue">In progress</span></td>
-          </tr>
-          <tr>
-            <td>[Research Title]</td>
-            <td>[Group]</td>
-            <td><span class="badge badge-red">Revision required</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <h2 class="card-title">Pending submissions ({{ chapters|length }})</h2>
+    {% if chapters %}
+      <div class="list-divide">
+        {% for chapter in chapters %}
+          <div class="list-row">
+            <div class="list-main">
+              <p class="list-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
+              <p class="list-sub">{{ chapter.project.title }} &middot; {{ chapter.project.owner.get_full_name|default:chapter.project.owner.username }}</p>
+            </div>
+            <a class="btn-link" href="{% url 'teacher_submissions' %}?chapter={{ chapter.pk }}">Review</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="page-sub">Nothing waiting for review.</p>
+    {% endif %}
   </section>
 
   <section class="surface">
     <h2 class="card-title">Review</h2>
-    <p class="review-meta">Chapter 2 &middot; Related Literature &middot; Version [n]</p>
-    <div class="locked-snapshot">[Submitted chapter text appears here as a locked snapshot]</div>
-    <label for="feedback" class="sr-only">Write feedback</label>
-    <textarea id="feedback" class="textarea" placeholder="Write feedback"></textarea>
-    <div class="review-actions">
-      <button type="button" class="btn-accent">Approve</button>
-      <button type="button" class="btn-outline">Request revision</button>
-    </div>
+    {% if selected %}
+      <p class="review-meta">Chapter {{ selected.number }} &middot; {{ selected.title }} &middot; {{ selected.project.title }}</p>
+      {% if draft and draft.submitted_at %}
+        <p class="review-meta">Submitted {{ draft.submitted_at|date:"M j, Y H:i" }} by {{ selected.project.owner.get_full_name|default:selected.project.owner.username }}</p>
+      {% endif %}
+      <div class="locked-snapshot" style="white-space: pre-line;">{% if draft %}{{ draft.content }}{% else %}No draft text submitted.{% endif %}</div>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="chapter" value="{{ selected.pk }}">
+        <label for="feedback" class="sr-only">Write feedback</label>
+        <textarea id="feedback" name="feedback" class="textarea" placeholder="Write feedback"></textarea>
+        <div class="review-actions">
+          <button type="submit" name="decision" value="APPROVED" class="btn-accent">Approve</button>
+          <button type="submit" name="decision" value="REVISION" class="btn-outline">Request revision</button>
+        </div>
+      </form>
+      {% if reviews %}
+        <div class="meta-list">
+          {% for review in reviews %}
+            <div class="history-row">
+              <div class="history-head">
+                <span class="badge {% if review.decision == 'APPROVED' %}badge-green{% else %}badge-red{% endif %}">{{ review.get_decision_display }}</span>
+                <strong>{{ review.reviewer.get_full_name|default:review.reviewer.username }}</strong>
+                <span class="list-sub">{{ review.created_at|date:"M j, Y H:i" }}</span>
+              </div>
+              {% if review.feedback %}
+                <p class="page-sub">{{ review.feedback|linebreaksbr }}</p>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% else %}
+      <p class="page-sub">Select a submission on the left to review it.</p>
+    {% endif %}
   </section>
 </div>
 {% endblock %}

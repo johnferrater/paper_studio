@@ -1,96 +1,100 @@
 {% extends "base_dashboard.html" %}
 {% block title %}Student · Paper Studio{% endblock %}
 {% block role %}STUDENT{% endblock %}
-{% block nav %}
-  <a class="nav-link active" href="#">Overview</a>
-  <a class="nav-link" href="#">My Research</a>
-  <a class="nav-link" href="#">Group Workspace</a>
-  <a class="nav-link" href="#">AI Assistant</a>
-  <a class="nav-link" href="#">Source Finder</a>
-  <a class="nav-link" href="#">RRL Organizer</a>
-  <a class="nav-link" href="#">Writing Workspace</a>
-  <a class="nav-link" href="#">References</a>
-  <a class="nav-link" href="#">Notifications</a>
-{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
     <h1 class="page-title">Overview</h1>
-    <p class="page-sub">Your research at a glance</p>
+    <p class="page-sub">Your research at a glance &middot; {{ project_count }} project{{ project_count|pluralize }}</p>
   </div>
-  <a href="#" class="btn-accent">New research project</a>
+  <a href="{% url 'research:project_create' %}" class="btn-accent">New research project</a>
 </div>
+
+{% if revision_count %}
+  <div class="revision-banner">
+    <div>
+      <strong>Revision required &middot; {{ revision_count }} chapter{{ revision_count|pluralize }}</strong>
+      <p class="page-sub">Your adviser returned these chapters. Open them to read the feedback and resubmit.</p>
+    </div>
+    <div class="quick-actions">
+      {% for chapter in revision_chapters %}
+        <a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn-outline">{{ chapter.project.title }} &middot; Ch {{ chapter.number }}</a>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
 
 <div class="overview-grid">
   <section class="surface span-5">
     <h2 class="card-title">Current project</h2>
-    <h3 class="project-title">[Research Title]</h3>
-    <span class="badge badge-purple">In progress</span>
-    <div class="meta-list">
-      <div class="meta-row">
-        <span class="meta-label">Adviser</span>
-        <span class="meta-value">[Teacher name]</span>
-      </div>
-      <div class="meta-row">
-        <span class="meta-label">Members</span>
-        <span class="meta-value">[Group members]</span>
-      </div>
-      <div class="meta-row">
-        <span class="meta-label">Deadline</span>
-        <span class="meta-value">[Date]</span>
-      </div>
-    </div>
+    {% with project=projects.0 %}
+      {% if project %}
+        <h3 class="project-title"><a class="btn-link" href="{{ project.get_absolute_url }}">{{ project.title }}</a></h3>
+        <span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span>
+        <div class="meta-list">
+          <div class="meta-row">
+            <span class="meta-label">Adviser</span>
+            <span class="meta-value">{{ project.adviser.get_full_name|default:project.adviser.username|default:"Unassigned" }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Members</span>
+            <span class="meta-value">{{ project.memberships.count }} member{{ project.memberships.count|pluralize }}</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Deadline</span>
+            <span class="meta-value">{{ project.deadline|default:"Not set" }}</span>
+          </div>
+        </div>
+      {% else %}
+        <p class="page-sub">You have no project yet. Create one to start your research.</p>
+        <div class="form-actions">
+          <a href="{% url 'research:project_create' %}" class="btn-accent">Create project</a>
+        </div>
+      {% endif %}
+    {% endwith %}
   </section>
 
   <section class="surface span-7">
-    <h2 class="card-title">Chapters</h2>
-    <div class="list-divide">
-      <div class="list-row">
-        <span>Chapter 1 &middot; Introduction</span>
-        <span class="badge badge-green">Approved</span>
-      </div>
-      <div class="list-row">
-        <span>Chapter 2 &middot; Related Literature</span>
-        <span class="badge badge-amber">For review</span>
-      </div>
-      <div class="list-row">
-        <span>Chapter 3 &middot; Methodology</span>
-        <span class="badge badge-gray">Draft</span>
-      </div>
-      <div class="list-row">
-        <span>Chapter 4 &middot; Results and Discussion</span>
-        <span class="badge badge-gray">Draft</span>
-      </div>
-      <div class="list-row">
-        <span>Chapter 5 &middot; Conclusions</span>
-        <span class="badge badge-gray">Draft</span>
-      </div>
+    <div class="card-head">
+      <h2 class="card-title">Chapters</h2>
+      <a href="{% url 'writing:index' %}" class="card-link">Writing workspace</a>
     </div>
+    {% if chapters %}
+      <div class="list-divide">
+        {% for chapter in chapters %}
+          <div class="list-row">
+            <div class="list-main">
+              <p class="list-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
+              <p class="list-sub">{{ chapter.project.title }}</p>
+            </div>
+            <span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span>
+            <a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn-link">Write</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="page-sub">No chapters yet. Add one from your project page.</p>
+    {% endif %}
   </section>
 
   <section class="surface span-7">
-    <h2 class="card-title">AI Assistant</h2>
-    <div class="chat">
-      <div class="chat-row chat-user">
-        <div class="chat-bubble">Help me refine my research questions.</div>
-      </div>
-      <div class="chat-row chat-bot">
-        <div class="chat-bubble">Using your title and Chapter 1 draft, here are three directions to consider. AI suggestions are not verified sources.</div>
-      </div>
+    <h2 class="card-title">Quick actions</h2>
+    <div class="quick-actions">
+      <a href="{% url 'research:project_list' %}" class="btn-outline">My research</a>
+      <a href="{% url 'sources:source_list' %}" class="btn-outline">Sources</a>
+      <a href="{% url 'citations:citation_list' %}" class="btn-outline">References</a>
+      <a href="{% url 'collaboration:index' %}" class="btn-outline">Group workspace</a>
+      <a href="{% url 'assistant:index' %}" class="btn-outline">AI assistant</a>
     </div>
-    <form method="get" action="" class="chat-form">
-      <input type="text" name="q" class="input" placeholder="Ask about your research" aria-label="Ask about your research">
-      <button type="submit" class="btn-accent">Send</button>
-    </form>
   </section>
 
   <section class="surface span-5">
-    <h2 class="card-title">Notifications</h2>
-    <div class="list-divide">
-      <div class="list-row"><span>Teacher feedback on Chapter 2</span></div>
-      <div class="list-row"><span>Group task due soon</span></div>
-      <div class="list-row"><span>Invitation to join a project</span></div>
+    <div class="card-head">
+      <h2 class="card-title">Notifications</h2>
+      <a href="{% url 'notifications:list' %}" class="card-link">View all</a>
     </div>
+    {% include "partials/notification_list.html" %}
   </section>
 </div>
 {% endblock %}

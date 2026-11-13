@@ -1,22 +1,14 @@
 {% extends "base_dashboard.html" %}
 {% block title %}Teacher · Paper Studio{% endblock %}
 {% block role %}TEACHER{% endblock %}
-{% block nav %}
-  <a class="nav-link active" href="{% url 'teacher_dashboard' %}">Overview</a>
-  <a class="nav-link" href="#">Assigned Projects</a>
-  <a class="nav-link" href="{% url 'teacher_submissions' %}">Student Submissions</a>
-  <a class="nav-link" href="#">Chapter Reviews</a>
-  <a class="nav-link" href="#">Feedback</a>
-  <a class="nav-link" href="#">Research Progress</a>
-  <a class="nav-link" href="#">Notifications</a>
-{% endblock %}
+{% block nav %}{% include "partials/nav.html" %}{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
     <h1 class="page-title">Overview</h1>
     <p class="page-sub">Your classes at a glance</p>
   </div>
-  <a href="#" class="btn-accent">New assignment</a>
+  <a href="{% url 'research:project_list' %}" class="btn-accent">Assigned projects</a>
 </div>
 
 <div class="overview-grid">
@@ -24,20 +16,16 @@
     <h2 class="card-title">Class summary</h2>
     <div class="meta-list">
       <div class="meta-row">
-        <span class="meta-label">Active classes</span>
-        <span class="meta-value">3</span>
+        <span class="meta-label">Assigned projects</span>
+        <span class="meta-value">{{ project_count }}</span>
       </div>
       <div class="meta-row">
-        <span class="meta-label">Students enrolled</span>
-        <span class="meta-value">68</span>
+        <span class="meta-label">Students</span>
+        <span class="meta-value">{{ student_count }}</span>
       </div>
       <div class="meta-row">
         <span class="meta-label">Pending reviews</span>
-        <span class="meta-value">9</span>
-      </div>
-      <div class="meta-row">
-        <span class="meta-label">Average grade</span>
-        <span class="meta-value">84%</span>
+        <span class="meta-value">{{ pending_count }}</span>
       </div>
     </div>
   </section>
@@ -47,86 +35,63 @@
       <h2 class="card-title">Pending submissions</h2>
       <a href="{% url 'teacher_submissions' %}" class="card-link">Review all</a>
     </div>
-    <div class="list-divide">
-      <div class="list-row">
-        <div class="list-main">
-          <p class="list-title">Literature Review Draft</p>
-          <p class="list-sub">Ana Villanueva &middot; RM 301</p>
-        </div>
-        <span class="badge badge-amber">For review</span>
-        <a href="{% url 'teacher_submissions' %}" class="btn-link">Review</a>
+    {% if pending_chapters %}
+      <div class="list-divide">
+        {% for chapter in pending_chapters %}
+          <div class="list-row">
+            <div class="list-main">
+              <p class="list-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
+              <p class="list-sub">{{ chapter.project.title }}</p>
+            </div>
+            <span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span>
+            <a href="{% url 'teacher_submissions' %}?chapter={{ chapter.pk }}" class="btn-link">Review</a>
+          </div>
+        {% endfor %}
       </div>
-      <div class="list-row">
-        <div class="list-main">
-          <p class="list-title">Annotated Bibliography</p>
-          <p class="list-sub">Marco Reyes &middot; AW 210</p>
-        </div>
-        <span class="badge badge-amber">For review</span>
-        <a href="{% url 'teacher_submissions' %}" class="btn-link">Review</a>
-      </div>
-      <div class="list-row">
-        <div class="list-main">
-          <p class="list-title">Data Cleaning Report</p>
-          <p class="list-sub">Liza Santos &middot; DA 340</p>
-        </div>
-        <span class="badge badge-amber">For review</span>
-        <a href="{% url 'teacher_submissions' %}" class="btn-link">Review</a>
-      </div>
-    </div>
+    {% else %}
+      <p class="page-sub">Nothing waiting for review.</p>
+    {% endif %}
   </section>
 
   <section class="surface span-7">
     <div class="card-head">
-      <h2 class="card-title">Course management</h2>
-      <a href="#" class="card-link">Manage courses</a>
+      <h2 class="card-title">Assigned projects</h2>
+      <a href="{% url 'research:project_list' %}" class="card-link">View all</a>
     </div>
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th scope="col">Course</th>
-            <th scope="col">Code</th>
-            <th scope="col">Students</th>
-            <th scope="col">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Research Methods &amp; Design</td>
-            <td>RM 301</td>
-            <td>24</td>
-            <td><span class="badge badge-green">Active</span></td>
-          </tr>
-          <tr>
-            <td>Academic Writing</td>
-            <td>AW 210</td>
-            <td>21</td>
-            <td><span class="badge badge-green">Active</span></td>
-          </tr>
-          <tr>
-            <td>Applied Data Analysis</td>
-            <td>DA 340</td>
-            <td>23</td>
-            <td><span class="badge badge-green">Active</span></td>
-          </tr>
-          <tr>
-            <td>Capstone Seminar</td>
-            <td>CS 400</td>
-            <td>16</td>
-            <td><span class="badge badge-gray">Draft</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    {% if projects %}
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Project</th>
+              <th scope="col">Owner</th>
+              <th scope="col">Status</th>
+              <th scope="col">Deadline</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for project in projects %}
+              <tr>
+                <td><a class="btn-link" href="{{ project.get_absolute_url }}">{{ project.title }}</a></td>
+                <td>{{ project.owner.get_full_name|default:project.owner.username }}</td>
+                <td><span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span></td>
+                <td>{{ project.deadline|default:"—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="page-sub">No projects have been assigned to you yet.</p>
+    {% endif %}
   </section>
 
   <section class="surface span-5">
-    <h2 class="card-title">Notifications</h2>
-    <div class="list-divide">
-      <div class="list-row"><span>3 new submissions in AW 210</span></div>
-      <div class="list-row"><span>Group task due tomorrow</span></div>
-      <div class="list-row"><span>Weekly progress report ready</span></div>
+    <div class="card-head">
+      <h2 class="card-title">Notifications</h2>
+      <a href="{% url 'notifications:list' %}" class="card-link">View all</a>
     </div>
+    {% include "partials/notification_list.html" %}
   </section>
 </div>
 {% endblock %}

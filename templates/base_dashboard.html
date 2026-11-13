@@ -5,6 +5,9 @@
     <div>
       <div class="app-brand">PAPER STUDIO</div>
       <div class="app-role">{% block role %}{% endblock %}</div>
+      {% if unread_notifications %}
+        <div class="sidebar-note">{{ unread_notifications }} unread notification{{ unread_notifications|pluralize }}</div>
+      {% endif %}
       <nav class="app-nav">{% block nav %}{% endblock %}</nav>
     </div>
     <div class="sidebar-footer">
@@ -15,6 +18,13 @@
       </form>
     </div>
   </aside>
-  <main class="app-main">{% block content %}{% endblock %}</main>
+  <main class="app-main">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="login-alert" role="alert">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
 </div>
 {% endblock %}
