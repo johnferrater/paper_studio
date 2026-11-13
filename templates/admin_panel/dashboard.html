@@ -1,122 +1,139 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Admin · Paper Studio{% endblock %}
-{% block role %}ADMINISTRATOR{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Administration &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block page_sub %}Platform health, users and research activity at a glance.{% endblock %}
+{% block page_actions %}
+  <a href="{% url 'admin:index' %}" class="btn btn--primary">
+    {% include "partials/icon.html" with name="shield" %}Open Django admin
+  </a>
+{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Overview</h1>
-    <p class="page-sub">Platform at a glance</p>
+
+<div class="stat-grid mb-2">
+  <div class="stat">
+    <p class="stat__label">Total users</p>
+    <p class="stat__value">{{ total_users }}</p>
+    <p class="stat__hint">{{ students }} students &middot; {{ teachers }} teachers</p>
   </div>
-  <a href="{% url 'admin:index' %}" class="btn-accent">Open Django admin</a>
+  <div class="stat">
+    <p class="stat__label">Administrators</p>
+    <p class="stat__value">{{ admins }}</p>
+    <p class="stat__hint">Full platform access</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Research projects</p>
+    <p class="stat__value">{{ project_count }}</p>
+    <p class="stat__hint">Across the whole platform</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Unread</p>
+    <p class="stat__value">{{ unread_notifications }}</p>
+    <p class="stat__hint">New notifications</p>
+  </div>
 </div>
 
-<div class="overview-grid">
-  <section class="surface span-5">
-    <h2 class="card-title">Platform summary</h2>
-    <div class="meta-list">
-      <div class="meta-row">
-        <span class="meta-label">Total users</span>
-        <span class="meta-value">{{ total_users }}</span>
+<div class="grid">
+  <section class="card span-7">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Recent projects</h2>
+        <p class="card__subtitle">Most recently updated research</p>
       </div>
-      <div class="meta-row">
-        <span class="meta-label">Students</span>
-        <span class="meta-value">{{ students }}</span>
-      </div>
-      <div class="meta-row">
-        <span class="meta-label">Teachers</span>
-        <span class="meta-value">{{ teachers }}</span>
-      </div>
-      <div class="meta-row">
-        <span class="meta-label">Administrators</span>
-        <span class="meta-value">{{ admins }}</span>
-      </div>
-      <div class="meta-row">
-        <span class="meta-label">Research projects</span>
-        <span class="meta-value">{{ project_count }}</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="surface span-7">
-    <div class="card-head">
-      <h2 class="card-title">Recent projects</h2>
-      <a href="{% url 'research:project_list' %}" class="card-link">View all</a>
+      <a href="{% url 'research:project_list' %}" class="card__link">View all</a>
     </div>
     {% if recent_projects %}
-      <div class="list-divide">
+      <div class="list">
         {% for project in recent_projects %}
-          <div class="list-row">
-            <div class="list-main">
-              <p class="list-title"><a class="btn-link" href="{{ project.get_absolute_url }}">{{ project.title }}</a></p>
-              <p class="list-sub">Owner {{ project.owner.get_full_name|default:project.owner.username }} &middot; updated {{ project.updated_at|date:"M j, Y" }}</p>
+          <div class="list__item">
+            <div class="list__main">
+              <p class="list__title"><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></p>
+              <p class="list__sub">Owner {{ project.owner.get_full_name|default:project.owner.username }} &middot; updated {{ project.updated_at|date:"M j, Y" }}</p>
             </div>
-            <span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span>
+            <div class="list__actions">
+              <span class="badge badge--{{ project.badge_class }}">{{ project.get_status_display }}</span>
+            </div>
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="page-sub">No projects yet.</p>
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="folder" %}</span>
+        <p class="empty__title">No projects yet</p>
+        <p class="empty__text">Research projects created by students will appear here.</p>
+      </div>
     {% endif %}
   </section>
 
-  <section class="surface span-7">
-    <div class="card-head">
-      <h2 class="card-title">Users by role</h2>
-      <a href="{% url 'admin:accounts_user_changelist' %}" class="card-link">Manage users</a>
+  <section class="card span-5">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Users by role</h2>
+        <p class="card__subtitle">Account distribution</p>
+      </div>
+      <a href="{% url 'admin:accounts_user_changelist' %}" class="card__link">Manage users</a>
     </div>
     <div class="table-wrap">
-      <table class="data-table">
+      <table class="table">
+        <caption class="sr-only">Number of users per role</caption>
         <thead>
           <tr>
             <th scope="col">Role</th>
-            <th scope="col">Users</th>
+            <th scope="col" class="table__actions">Users</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Students</td>
-            <td>{{ students }}</td>
+            <td class="table__primary">Students</td>
+            <td class="table__actions">{{ students }}</td>
           </tr>
           <tr>
-            <td>Teachers</td>
-            <td>{{ teachers }}</td>
+            <td class="table__primary">Teachers</td>
+            <td class="table__actions">{{ teachers }}</td>
           </tr>
           <tr>
-            <td>Administrators</td>
-            <td>{{ admins }}</td>
+            <td class="table__primary">Administrators</td>
+            <td class="table__actions">{{ admins }}</td>
           </tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <section class="surface span-5">
-    <h2 class="card-title">System status</h2>
-    <div class="list-divide">
-      <div class="list-row">
-        <span>Database</span>
-        <span class="badge badge-green">Operational</span>
+  <section class="card span-5">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">System status</h2>
+        <p class="card__subtitle">Service configuration</p>
       </div>
-      <div class="list-row">
-        <span>Email service</span>
-        <span class="badge badge-blue">Console (dev)</span>
+    </div>
+    <div class="list">
+      <div class="list__item">
+        <span class="list__title">Database</span>
+        <span class="badge badge--green">Operational</span>
       </div>
-      <div class="list-row">
-        <span>AI assistant</span>
+      <div class="list__item">
+        <span class="list__title">Email service</span>
+        <span class="badge badge--blue">Console (dev)</span>
+      </div>
+      <div class="list__item">
+        <span class="list__title">AI assistant</span>
         {% if assistant_configured %}
-          <span class="badge badge-green">Configured</span>
+          <span class="badge badge--green">Configured</span>
         {% else %}
-          <span class="badge badge-amber">Not configured</span>
+          <span class="badge badge--amber">Not configured</span>
         {% endif %}
       </div>
     </div>
   </section>
 
-  <section class="surface span-7">
-    <div class="card-head">
-      <h2 class="card-title">Notifications</h2>
-      <a href="{% url 'notifications:list' %}" class="card-link">View all</a>
+  <section class="card span-7">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Notifications</h2>
+        <p class="card__subtitle">Latest activity on your account</p>
+      </div>
+      <a href="{% url 'notifications:list' %}" class="card__link">View all</a>
     </div>
     {% include "partials/notification_list.html" %}
   </section>

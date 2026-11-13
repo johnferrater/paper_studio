@@ -1,46 +1,82 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Analytics · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Analytics &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Analytics{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block page_sub %}Platform research activity at a glance.{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Analytics</h1>
-    <p class="page-sub">Platform research activity at a glance</p>
+
+<div class="stat-grid mb-2">
+  <div class="stat">
+    <p class="stat__label">Projects</p>
+    <p class="stat__value">{{ project_count }}</p>
+    <p class="stat__hint">Research projects on the platform</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Users</p>
+    <p class="stat__value">{{ user_count }}</p>
+    <p class="stat__hint">Students, teachers and admins</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Sources</p>
+    <p class="stat__value">{{ source_count }}</p>
+    <p class="stat__hint">Collected references</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Citations</p>
+    <p class="stat__value">{{ citation_count }}</p>
+    <p class="stat__hint">Formatted references</p>
   </div>
 </div>
 
-<div class="overview-grid">
-  <section class="surface span-5">
-    <h2 class="card-title">Totals</h2>
-    <div class="meta-list">
-      <div class="meta-row"><span class="meta-label">Projects</span><span class="meta-value">{{ project_count }}</span></div>
-      <div class="meta-row"><span class="meta-label">Users</span><span class="meta-value">{{ user_count }}</span></div>
-      <div class="meta-row"><span class="meta-label">Sources</span><span class="meta-value">{{ source_count }}</span></div>
-      <div class="meta-row"><span class="meta-label">Citations</span><span class="meta-value">{{ citation_count }}</span></div>
+<div class="grid">
+  <section class="card span-6">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Projects by status</h2>
+        <p class="card__subtitle">Where research currently sits</p>
+      </div>
     </div>
+    {% if projects_by_status %}
+      <div class="list">
+        {% for row in projects_by_status %}
+          <div class="list__item">
+            <span class="list__title">{{ row.label }}</span>
+            <span class="meta-value">{{ row.total }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="folder" %}</span>
+        <p class="empty__title">No projects yet</p>
+        <p class="empty__text">Status distribution will appear once research projects are created.</p>
+      </div>
+    {% endif %}
   </section>
 
-  <section class="surface span-7">
-    <h2 class="card-title">Projects by status</h2>
-    <div class="list-divide">
-      {% for row in projects_by_status %}
-        <div class="list-row"><span>{{ row.label }}</span><span class="meta-value">{{ row.total }}</span></div>
-      {% empty %}
-        <div class="list-row"><span>No projects yet.</span></div>
-      {% endfor %}
+  <section class="card span-6">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Users by role</h2>
+        <p class="card__subtitle">Account distribution</p>
+      </div>
     </div>
-  </section>
-
-  <section class="surface span-7">
-    <h2 class="card-title">Users by role</h2>
-    <div class="list-divide">
-      {% for row in users_by_role %}
-        <div class="list-row"><span>{{ row.label }}</span><span class="meta-value">{{ row.total }}</span></div>
-      {% empty %}
-        <div class="list-row"><span>No users yet.</span></div>
-      {% endfor %}
-    </div>
+    {% if users_by_role %}
+      <div class="list">
+        {% for row in users_by_role %}
+          <div class="list__item">
+            <span class="list__title">{{ row.label }}</span>
+            <span class="meta-value">{{ row.total }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="users" %}</span>
+        <p class="empty__title">No users yet</p>
+        <p class="empty__text">Accounts created on the platform will be counted here.</p>
+      </div>
+    {% endif %}
   </section>
 </div>
 {% endblock %}

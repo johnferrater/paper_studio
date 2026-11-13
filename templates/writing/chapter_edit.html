@@ -1,91 +1,107 @@
 {% extends "base_dashboard.html" %}
-{% block title %}{{ chapter }} · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Chapter {{ chapter.number }} &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Writing{% endblock %}
+{% block page_title %}Chapter {{ chapter.number }} &middot; {{ chapter.title }}{% endblock %}
+{% block page_sub %}{{ chapter.project.title }} &middot; <span class="badge badge--{{ chapter.badge_class }}">{{ chapter.get_status_display }}</span>{% endblock %}
+{% block page_actions %}
+  <a href="{{ chapter.project.get_absolute_url }}" class="btn btn--ghost">Back to project</a>
+{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</h1>
-    <p class="page-sub">{{ chapter.project.title }} &middot; <span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span></p>
-  </div>
-  <a href="{{ chapter.project.get_absolute_url }}" class="btn-outline">Back to project</a>
-</div>
 
 {% if is_resubmission %}
-  <div class="revision-banner">
-    <div>
-      <strong>Revision required</strong>
-      <p class="page-sub">Your adviser returned this chapter. Read the feedback on the right, update the content, then resubmit for review.</p>
+  <div class="callout mb-2">
+    <span class="callout__icon">{% include "partials/icon.html" with name="alert" %}</span>
+    <div class="callout__body">
+      <p class="callout__title">Revision required</p>
+      <p class="callout__text">Your adviser returned this chapter. Read the feedback, update the content, then resubmit it for review.</p>
     </div>
   </div>
 {% endif %}
 
-<div class="overview-grid">
-  <section class="surface span-7">
-    <div class="card-head">
-      <h2 class="card-title">Chapter content</h2>
-      {% if draft and draft.submitted_at %}
-        <span class="list-sub">Last submitted {{ draft.submitted_at|date:"M j, Y H:i" }}</span>
-      {% endif %}
+<div class="grid">
+  <section class="card span-7">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Chapter content</h2>
+        <p class="card__subtitle">
+          {% if draft and draft.submitted_at %}
+            Last submitted {{ draft.submitted_at|date:"M j, Y H:i" }}
+          {% else %}
+            {% if draft %}Version {{ draft.version }} &middot; last saved {{ draft.updated_at|date:"M j, Y H:i" }}{% else %}No draft saved yet{% endif %}
+          {% endif %}
+        </p>
+      </div>
     </div>
 
     {% if can_edit %}
-      {% if draft %}
-        <p class="page-sub">Version {{ draft.version }} &middot; last saved {{ draft.updated_at|date:"M j, Y H:i" }} by {{ draft.author.username }}</p>
-      {% else %}
-        <p class="page-sub">No draft yet. Your first save creates version 1.</p>
-      {% endif %}
-      <form method="post" class="stack-form">
+      <form method="post">
         {% csrf_token %}
-        <div class="form-field">
-          <label for="{{ form.content.id_for_label }}" class="login-label">{{ form.content.label }}</label>
+        <div class="field">
+          <label class="label" for="{{ form.content.id_for_label }}">{{ form.content.label }}</label>
           {{ form.content }}
           {% if form.content.errors %}<p class="field-error">{{ form.content.errors|join:" " }}</p>{% endif %}
+          <div class="row row--split">
+            <p class="field-help">Saving keeps a new version. Submitting sends the chapter to your adviser.</p>
+            <p class="field-help"><span id="word-count">0 words</span></p>
+          </div>
         </div>
-        <div class="form-actions">
-          <button type="submit" name="action" value="save" class="btn-outline">Save draft</button>
+        <div class="form-actions mt-2">
+          <button type="submit" name="action" value="save" class="btn btn--secondary" data-loading-label="Saving…">Save draft</button>
           {% if is_resubmission %}
-            <button type="submit" name="action" value="submit" class="btn-accent">Resubmit for Review</button>
+            <button type="submit" name="action" value="submit" class="btn btn--primary" data-confirm="Submit this chapter for review? Your adviser will be notified." data-loading-label="Submitting…">Resubmit for review</button>
           {% else %}
-            <button type="submit" name="action" value="submit" class="btn-accent">Submit for review</button>
+            <button type="submit" name="action" value="submit" class="btn btn--primary" data-confirm="Submit this chapter for review? Your adviser will be notified." data-loading-label="Submitting…">Submit for review</button>
           {% endif %}
         </div>
       </form>
     {% else %}
       {% if draft %}
-        <div class="locked-snapshot" style="white-space: pre-line;">{{ draft.content }}</div>
+        <pre class="snapshot">{{ draft.content }}</pre>
       {% else %}
-        <p class="page-sub">No content has been saved for this chapter yet.</p>
+        <div class="empty">
+          <span class="empty__icon">{% include "partials/icon.html" with name="pen" %}</span>
+          <p class="empty__title">No content yet</p>
+          <p class="empty__text">Nothing has been saved for this chapter so far.</p>
+        </div>
       {% endif %}
       {% if is_owner %}
-        <p class="page-sub">This chapter is locked while it is {{ chapter.get_status_display|lower }}.</p>
+        <p class="field-help mt-2">This chapter is locked while it is {{ chapter.get_status_display|lower }}.</p>
       {% else %}
-        <p class="page-sub">Only the chapter owner can edit this content.</p>
+        <p class="field-help mt-2">Only the chapter owner can edit this content.</p>
       {% endif %}
     {% endif %}
   </section>
 
-  <section class="surface span-5">
-    <h2 class="card-title">Review history</h2>
+  <section class="card span-5">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Review history</h2>
+        <p class="card__subtitle">Feedback from your adviser</p>
+      </div>
+    </div>
     {% if reviews %}
-      <div class="list-divide">
+      <div class="timeline">
         {% for review in reviews %}
-          <div class="history-row">
-            <div class="history-head">
-              <span class="badge {% if review.decision == 'APPROVED' %}badge-green{% else %}badge-red{% endif %}">{{ review.get_decision_display }}</span>
+          <div class="timeline__item">
+            <div class="timeline__head">
+              <span class="badge {% if review.decision == 'APPROVED' %}badge--green{% else %}badge--red{% endif %}">{{ review.get_decision_display }}</span>
               <strong>{{ review.reviewer.get_full_name|default:review.reviewer.username }}</strong>
-              <span class="list-sub">{{ review.created_at|date:"M j, Y H:i" }}</span>
+              <span class="timeline__time">{{ review.created_at|date:"M j, Y H:i" }}</span>
             </div>
             {% if review.feedback %}
-              <p class="page-sub">{{ review.feedback|linebreaksbr }}</p>
+              <p class="timeline__body">{{ review.feedback|linebreaksbr }}</p>
             {% else %}
-              <p class="list-sub">No written feedback.</p>
+              <p class="timeline__body">No written feedback.</p>
             {% endif %}
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="page-sub">No review feedback yet. Submit this chapter to your adviser.</p>
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="chat" %}</span>
+        <p class="empty__title">No feedback yet</p>
+        <p class="empty__text">Submit this chapter to your adviser to start the review cycle.</p>
+      </div>
     {% endif %}
   </section>
 </div>

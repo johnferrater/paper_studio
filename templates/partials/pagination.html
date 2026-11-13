@@ -1,0 +1,29 @@
+{% if page_obj and page_obj.paginator.num_pages > 1 %}
+  <nav class="pagination" aria-label="Pagination">
+    <p class="pagination__status">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      &middot; {{ page_obj.paginator.count }} {% if page_obj.paginator.count == 1 %}item{% else %}items{% endif %}
+    </p>
+    <div class="pagination__controls">
+      {% if page_obj.has_previous %}
+        <a class="pagination__page" href="{% querystring page=page_obj.previous_page_number %}">Previous</a>
+      {% else %}
+        <span class="pagination__page" aria-disabled="true">Previous</span>
+      {% endif %}
+
+      {% for number in page_obj.paginator.page_range %}
+        {% if number == page_obj.number %}
+          <span class="pagination__page is-current" aria-current="page">{{ number }}</span>
+        {% elif number > page_obj.number|add:"-3" and number < page_obj.number|add:"3" %}
+          <a class="pagination__page" href="{% querystring page=number %}">{{ number }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <a class="pagination__page" href="{% querystring page=page_obj.next_page_number %}">Next</a>
+      {% else %}
+        <span class="pagination__page" aria-disabled="true">Next</span>
+      {% endif %}
+    </div>
+  </nav>
+{% endif %}

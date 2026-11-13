@@ -1,30 +1,39 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Add source · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Add source &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Sources{% endblock %}
+{% block page_title %}Add source{% endblock %}
+{% block page_sub %}{{ project.title }}{% endblock %}
+{% block page_actions %}
+  <a href="{{ project.get_absolute_url }}" class="btn btn--ghost">Back to project</a>
+{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Add source</h1>
-    <p class="page-sub">{{ project.title }}</p>
-  </div>
-  <a href="{{ project.get_absolute_url }}" class="btn-outline">Back to project</a>
-</div>
-
-<section class="surface form-surface">
-  <form method="post" class="stack-form">
+<section class="card form-card">
+  <form method="post">
     {% csrf_token %}
-    {% for field in form %}
-      <div class="form-field">
-        <label for="{{ field.id_for_label }}" class="login-label">{{ field.label }}</label>
-        {{ field }}
-        {% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
-        {% if field.errors %}<p class="field-error">{{ field.errors|join:" " }}</p>{% endif %}
+
+    {% if form.non_field_errors %}
+      <div class="alert alert--error mb-2" role="alert">
+        <span class="alert__icon">{% include "partials/icon.html" with name="alert" %}</span>
+        <p class="alert__text">{{ form.non_field_errors|join:" " }}</p>
       </div>
-    {% endfor %}
-    <div class="form-actions">
-      <button type="submit" class="btn-accent">Save source</button>
-      <a href="{{ project.get_absolute_url }}" class="btn-outline">Cancel</a>
+    {% endif %}
+
+    <div class="stack">
+      {% for field in form %}
+        <div class="field">
+          <label class="label" for="{{ field.id_for_label }}">
+            {{ field.label }}{% if field.field.required %}<span class="required" aria-hidden="true">*</span>{% endif %}
+          </label>
+          {{ field }}
+          {% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
+          {% if field.errors %}<p class="field-error">{{ field.errors|join:" " }}</p>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="form-actions mt-3">
+      <button type="submit" class="btn btn--primary">Save source</button>
+      <a href="{{ project.get_absolute_url }}" class="btn btn--ghost">Cancel</a>
     </div>
   </form>
 </section>

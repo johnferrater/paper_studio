@@ -1,19 +1,42 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Sources · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Sources &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Sources{% endblock %}
+{% block page_title %}Source finder{% endblock %}
+{% block page_sub %}Every source saved across the projects you can see.{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Source finder</h1>
-    <p class="page-sub">Every source saved across your projects</p>
-  </div>
-</div>
 
-<section class="surface">
+<form class="toolbar" method="get" role="search">
+  <div class="toolbar__search">
+    <label class="sr-only" for="id_q">Search sources</label>
+    {% include "partials/icon.html" with name="search" %}
+    <input class="input" type="search" id="id_q" name="q" value="{{ query }}" placeholder="Search by title, author or DOI">
+  </div>
+  <div class="toolbar__field">
+    <label class="sr-only" for="id_type">Filter by type</label>
+    <select class="input" id="id_type" name="type">
+      <option value="">All types</option>
+      {% for value, label in source_type_choices %}
+        <option value="{{ value }}" {% if source_type == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="toolbar__field">
+    <label class="sr-only" for="id_sort">Sort sources</label>
+    <select class="input" id="id_sort" name="sort">
+      <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Recently added</option>
+      <option value="title" {% if sort == 'title' %}selected{% endif %}>Title A–Z</option>
+      <option value="year" {% if sort == 'year' %}selected{% endif %}>Year</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn--secondary">Apply</button>
+  {% if query or source_type %}<a class="btn btn--ghost" href="{% url 'sources:source_list' %}">Clear</a>{% endif %}
+</form>
+
+<section class="card">
   {% if sources %}
     <div class="table-wrap">
-      <table class="data-table">
+      <table class="table">
+        <caption class="sr-only">Saved sources</caption>
         <thead>
           <tr>
             <th scope="col">Title</th>
@@ -26,18 +49,37 @@
         <tbody>
           {% for source in sources %}
             <tr>
-              <td>{% if source.url %}<a class="btn-link" href="{{ source.url }}" target="_blank" rel="noopener">{{ source.title }}</a>{% else %}{{ source.title }}{% endif %}</td>
-              <td>{{ source.authors }}</td>
-              <td>{{ source.year|default:"—" }}</td>
-              <td>{{ source.get_source_type_display }}</td>
-              <td><a class="btn-link" href="{{ source.project.get_absolute_url }}">{{ source.project.title }}</a></td>
+              <td class="table__primary">
+                {% if source.url %}
+                  <a href="{{ source.url }}" target="_blank" rel="noopener">{{ source.title }}</a>
+                {% else %}
+                  {{ source.title }}
+                {% endif %}
+              </td>
+              <td class="table__muted">{{ source.authors }}</td>
+              <td class="table__muted">{{ source.year|default:"—" }}</td>
+              <td><span class="badge badge--gray">{{ source.get_source_type_display }}</span></td>
+              <td class="table__muted"><a href="{{ source.project.get_absolute_url }}">{{ source.project.title }}</a></td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% else %}
-    <p class="page-sub">No sources yet. Add one from a research project.</p>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="library" %}</span>
+      <p class="empty__title">No sources found</p>
+      {% if query or source_type %}
+        <p class="empty__text">No source matches the current search and filters. Try another term or clear the filters.</p>
+        <div class="empty__action">
+          <a class="btn btn--secondary" href="{% url 'sources:source_list' %}">Clear filters</a>
+        </div>
+      {% else %}
+        <p class="empty__text">Add a source from a research project to build your reference library.</p>
+      {% endif %}
+    </div>
   {% endif %}
 </section>
+
+{% include "partials/pagination.html" %}
 {% endblock %}

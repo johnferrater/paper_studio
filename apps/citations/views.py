@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.views.generic import ListView
 
@@ -13,14 +14,27 @@ class CitationListView(LoginRequiredMixin, ListView):
     model = Citation
     template_name = "citations/citation_list.html"
     context_object_name = "citations"
+    paginate_by = 15
 
     def get_queryset(self):
-        return (
-            Citation.objects.filter(
-                project__in=visible_projects(self.request.user)
+        queryset = Citation.objects.filter(
+            project__in=visible_projects(self.request.user)
+        ).select_related("project", "source")
+
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            queryset = queryset.filter(
+                Q(formatted_text__icontains=query)
+                | Q(source__title__icontains=query)
+                | Q(source__authors__icontains=query)
+                | Q(project__title__icontains=query)
             )
-            .select_related("project", "source")
-        )
+        return queryset.order_by("-created_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.request.GET.get("q", "").strip()
+        return context
 
 
 @login_required

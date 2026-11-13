@@ -80,6 +80,9 @@ class StudentDashboardView(StudentRequiredMixin, TemplateView):
             .select_related("project")
             .order_by("project__title", "number")[:8]
         )
+        context["chapter_count"] = Chapter.objects.filter(
+            project__in=projects
+        ).count()
         revision_chapters = Chapter.objects.filter(
             project__in=projects, status=Chapter.Status.REVISION
         ).select_related("project")

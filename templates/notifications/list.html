@@ -1,46 +1,79 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Notifications · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
-{% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Notifications</h1>
-    <p class="page-sub">{{ unread_notifications }} unread</p>
-  </div>
+{% block title %}Notifications &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Notifications{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+{% block page_sub %}{{ unread_notifications }} unread notification{{ unread_notifications|pluralize }}.{% endblock %}
+{% block page_actions %}
   {% if unread_notifications %}
     <form method="post" action="{% url 'notifications:mark_all_read' %}">
       {% csrf_token %}
-      <button type="submit" class="btn-outline">Mark all as read</button>
+      <button type="submit" class="btn btn--secondary">Mark all as read</button>
     </form>
   {% endif %}
-</div>
+{% endblock %}
+{% block content %}
 
-<section class="surface">
+<form class="toolbar" method="get" role="search">
+  <div class="toolbar__search">
+    <label class="sr-only" for="id_q">Search notifications</label>
+    {% include "partials/icon.html" with name="search" %}
+    <input class="input" type="search" id="id_q" name="q" value="{{ query }}" placeholder="Search notifications">
+  </div>
+  <div class="toolbar__field">
+    <label class="sr-only" for="id_filter">Filter notifications</label>
+    <select class="input" id="id_filter" name="filter">
+      <option value="">All notifications</option>
+      <option value="unread" {% if filter == 'unread' %}selected{% endif %}>Unread only</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn--secondary">Apply</button>
+  {% if query or filter %}<a class="btn btn--ghost" href="{% url 'notifications:list' %}">Clear</a>{% endif %}
+</form>
+
+<section class="card">
   {% if notifications %}
-    <div class="list-divide">
+    <div class="list">
       {% for notification in notifications %}
-        <div class="list-row">
-          <div class="list-main">
-            <p class="list-title">
-              {% if notification.url %}<a class="btn-link" href="{{ notification.url }}">{{ notification.message }}</a>{% else %}{{ notification.message }}{% endif %}
+        <div class="list__item">
+          <div class="list__main">
+            <p class="list__title">
+              {% if notification.url %}
+                <a href="{{ notification.url }}">{{ notification.message }}</a>
+              {% else %}
+                {{ notification.message }}
+              {% endif %}
             </p>
-            <p class="list-sub">{{ notification.created_at|date:"M j, Y H:i" }}</p>
+            <p class="list__sub">{{ notification.created_at|date:"M j, Y H:i" }}</p>
           </div>
-          {% if not notification.is_read %}
-            <span class="badge badge-amber">New</span>
-            <form method="post" action="{% url 'notifications:mark_read' notification.pk %}">
-              {% csrf_token %}
-              <button type="submit" class="btn-link">Mark read</button>
-            </form>
-          {% else %}
-            <span class="badge badge-gray">Read</span>
-          {% endif %}
+          <div class="list__actions">
+            {% if not notification.is_read %}
+              <span class="badge badge--amber">New</span>
+              <form method="post" action="{% url 'notifications:mark_read' notification.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-link">Mark read</button>
+              </form>
+            {% else %}
+              <span class="badge badge--gray">Read</span>
+            {% endif %}
+          </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p class="page-sub">No notifications yet.</p>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="bell" %}</span>
+      <p class="empty__title">Nothing here</p>
+      {% if query or filter %}
+        <p class="empty__text">No notification matches the current search and filters.</p>
+        <div class="empty__action">
+          <a class="btn btn--secondary" href="{% url 'notifications:list' %}">Clear filters</a>
+        </div>
+      {% else %}
+        <p class="empty__text">Review feedback, group activity and status changes will appear here.</p>
+      {% endif %}
+    </div>
   {% endif %}
 </section>
+
+{% include "partials/pagination.html" %}
 {% endblock %}

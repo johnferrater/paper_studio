@@ -12,11 +12,11 @@ class Project(models.Model):
         ARCHIVED = "ARCHIVED", "Archived"
 
     BADGE_CLASSES = {
-        Status.DRAFT: "badge-gray",
-        Status.IN_PROGRESS: "badge-blue",
-        Status.FOR_REVIEW: "badge-amber",
-        Status.APPROVED: "badge-green",
-        Status.ARCHIVED: "badge-gray",
+        Status.DRAFT: "badge--gray",
+        Status.IN_PROGRESS: "badge--blue",
+        Status.FOR_REVIEW: "badge--amber",
+        Status.APPROVED: "badge--green",
+        Status.ARCHIVED: "badge--gray",
     }
 
     title = models.CharField(max_length=255)
@@ -52,7 +52,7 @@ class Project(models.Model):
 
     @property
     def badge_class(self):
-        return self.BADGE_CLASSES.get(self.status, "badge-gray")
+        return self.BADGE_CLASSES.get(self.status, "badge--gray")
 
 
 class Chapter(models.Model):
@@ -63,10 +63,10 @@ class Chapter(models.Model):
         REVISION = "REVISION", "Revision required"
 
     BADGE_CLASSES = {
-        Status.DRAFT: "badge-gray",
-        Status.FOR_REVIEW: "badge-amber",
-        Status.APPROVED: "badge-green",
-        Status.REVISION: "badge-red",
+        Status.DRAFT: "badge--gray",
+        Status.FOR_REVIEW: "badge--amber",
+        Status.APPROVED: "badge--green",
+        Status.REVISION: "badge--red",
     }
 
     project = models.ForeignKey(
@@ -93,4 +93,4 @@ class Chapter(models.Model):
 
     @property
     def badge_class(self):
-        return self.BADGE_CLASSES.get(self.status, "badge-gray")
+        return self.BADGE_CLASSES.get(self.status, "badge--gray")

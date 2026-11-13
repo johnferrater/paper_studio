@@ -1,0 +1,21 @@
+{% if messages %}
+  <div class="flash-stack" role="status" aria-live="polite">
+    {% for message in messages %}
+      <div class="alert alert--{{ message.tags|default:'info' }}">
+        <span class="alert__icon">
+          {% if message.tags == 'success' %}
+            {% include "partials/icon.html" with name="check" %}
+          {% elif message.tags == 'error' or message.tags == 'danger' %}
+            {% include "partials/icon.html" with name="alert" %}
+          {% elif message.tags == 'warning' %}
+            {% include "partials/icon.html" with name="alert" %}
+          {% else %}
+            {% include "partials/icon.html" with name="info" %}
+          {% endif %}
+        </span>
+        <p class="alert__text">{{ message }}</p>
+        <button class="alert__close" type="button" data-alert-dismiss aria-label="Dismiss message">&times;</button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

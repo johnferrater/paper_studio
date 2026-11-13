@@ -1,41 +1,43 @@
-{% extends "base.html" %}
-{% block title %}Sign in · Paper Studio{% endblock %}
-{% block body %}
-<div class="login-shell">
-  <section class="login-hero">
-    <div class="login-hero-brand">PAPER STUDIO</div>
-    <div class="login-hero-body">
-      <h1>Research, written together.</h1>
-      <p>Plan projects, write chapters, find sources, and get feedback from your research teacher in one workspace.</p>
+{% extends "accounts/auth_base.html" %}
+{% block title %}Sign in &middot; Paper Studio{% endblock %}
+{% block auth_headline %}Research, written together.{% endblock %}
+{% block auth_text %}Plan projects, collect sources, write chapters and get feedback from your adviser — all in one workspace.{% endblock %}
+{% block auth_foot %}Students, teachers and administrators{% endblock %}
+{% block auth_card %}
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <h2 class="auth__title">Sign in</h2>
+    <p class="auth__subtitle">Use your Paper Studio account.</p>
+
+    {% if form.errors %}
+      <div class="alert alert--error" role="alert">
+        <span class="alert__icon">{% include "partials/icon.html" with name="alert" %}</span>
+        <p class="alert__text">Incorrect username or password. Please try again.</p>
+      </div>
+    {% endif %}
+
+    <div class="stack">
+      <div class="field">
+        <label class="label" for="id_username">Username or email</label>
+        <input class="input" type="text" name="username" id="id_username" placeholder="you@school.edu" autocomplete="username" required autofocus>
+      </div>
+
+      <div class="field">
+        <label class="label" for="id_password">Password</label>
+        <input class="input" type="password" name="password" id="id_password" placeholder="Password" autocomplete="current-password" required>
+      </div>
     </div>
-    <div class="login-hero-foot">Students, teachers, and administrators</div>
-  </section>
 
-  <section class="login-panel">
-    <form method="post" class="login-card">
-      {% csrf_token %}
-      <input type="hidden" name="next" value="{{ next }}">
-      <h2 class="login-title">Sign in</h2>
-      <p class="login-sub">Use your paper_studio account.</p>
+    <p class="mt-1">
+      <a class="btn-link" href="{% url 'password_reset' %}">Forgot your password?</a>
+    </p>
 
-      {% if form.errors %}
-        <div class="login-alert" role="alert">Incorrect username or password.</div>
-      {% endif %}
+    <button type="submit" class="btn btn--primary btn--lg btn--block mt-2">Sign in</button>
 
-      <div class="login-field">
-        <label for="id_username" class="login-label">Username or email</label>
-        <input type="text" name="username" id="id_username" class="login-input" placeholder="you@school.edu" autocomplete="username" required autofocus>
-      </div>
-
-      <div class="login-field">
-        <label for="id_password" class="login-label">Password</label>
-        <input type="password" name="password" id="id_password" class="login-input" placeholder="Password" autocomplete="current-password" required>
-      </div>
-
-      <a href="{% url 'password_reset' %}" class="forgot-link">Forgot password?</a>
-      <button type="submit" class="login-submit">Sign in</button>
-      <p class="login-alt">New student? <a href="{% url 'register' %}">Create an account</a>. Teacher accounts are created by an administrator.</p>
-    </form>
-  </section>
-</div>
+    <p class="auth__footer">
+      New student? <a href="{% url 'register' %}">Create an account</a>.<br>
+      Teacher and administrator accounts are created by an administrator.
+    </p>
+  </form>
 {% endblock %}

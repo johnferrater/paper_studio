@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Permission denied &middot; Paper Studio{% endblock %}
+{% block body %}
+<div class="error-page">
+  <div class="error-page__card">
+    <p class="error-page__code">403</p>
+    <h1 class="error-page__title">You do not have access to this page</h1>
+    <p class="error-page__text">Your account does not have permission to open this area. If you think this is a mistake, contact an administrator.</p>
+    <a class="btn btn--primary" href="{% url 'home' %}">Back to your dashboard</a>
+  </div>
+</div>
+{% endblock %}

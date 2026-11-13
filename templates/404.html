@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Page not found &middot; Paper Studio{% endblock %}
+{% block body %}
+<div class="error-page">
+  <div class="error-page__card">
+    <p class="error-page__code">404</p>
+    <h1 class="error-page__title">We could not find that page</h1>
+    <p class="error-page__text">The link may be out of date, or the project, chapter or source it pointed to has been removed.</p>
+    <a class="btn btn--primary" href="{% url 'home' %}">Back to your dashboard</a>
+  </div>
+</div>
+{% endblock %}

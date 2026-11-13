@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Something went wrong &middot; Paper Studio{% endblock %}
+{% block body %}
+<div class="error-page">
+  <div class="error-page__card">
+    <p class="error-page__code">500</p>
+    <h1 class="error-page__title">Something went wrong</h1>
+    <p class="error-page__text">The request could not be completed. Your work is safe — try again in a moment.</p>
+    <a class="btn btn--primary" href="/">Back to your dashboard</a>
+  </div>
+</div>
+{% endblock %}

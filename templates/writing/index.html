@@ -1,43 +1,71 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Writing workspace · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Writing workspace &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Writing{% endblock %}
+{% block page_title %}Writing workspace{% endblock %}
+{% block page_sub %}Draft chapters and submit them for adviser review.{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Writing workspace</h1>
-    <p class="page-sub">Draft chapters and submit them for review</p>
-  </div>
-</div>
 
-<section class="surface">
+<form class="toolbar" method="get" role="search">
+  <div class="toolbar__search">
+    <label class="sr-only" for="id_q">Search chapters</label>
+    {% include "partials/icon.html" with name="search" %}
+    <input class="input" type="search" id="id_q" name="q" value="{{ query }}" placeholder="Search by chapter or project title">
+  </div>
+  <div class="toolbar__field">
+    <label class="sr-only" for="id_status">Filter by status</label>
+    <select class="input" id="id_status" name="status">
+      <option value="">All statuses</option>
+      {% for value, label in chapter_status_choices %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn btn--secondary">Apply</button>
+  {% if query or status %}<a class="btn btn--ghost" href="{% url 'writing:index' %}">Clear</a>{% endif %}
+</form>
+
+<section class="card">
   {% if chapters %}
     <div class="table-wrap">
-      <table class="data-table">
+      <table class="table">
+        <caption class="sr-only">Chapters available to write</caption>
         <thead>
           <tr>
             <th scope="col">Project</th>
             <th scope="col">Chapter</th>
             <th scope="col">Status</th>
             <th scope="col">Drafts</th>
-            <th scope="col"></th>
+            <th scope="col" class="table__actions"><span class="sr-only">Actions</span></th>
           </tr>
         </thead>
         <tbody>
           {% for chapter in chapters %}
             <tr>
-              <td>{{ chapter.project.title }}</td>
-              <td>Chapter {{ chapter.number }} &middot; {{ chapter.title }}</td>
-              <td><span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span></td>
-              <td>{{ chapter.drafts.count }}</td>
-              <td><a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn-link">Open</a></td>
+              <td class="table__muted">{{ chapter.project.title }}</td>
+              <td class="table__primary">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</td>
+              <td><span class="badge badge--{{ chapter.badge_class }}">{{ chapter.get_status_display }}</span></td>
+              <td class="table__muted">{{ chapter.drafts.count }}</td>
+              <td class="table__actions"><a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn btn--secondary btn--sm">Open</a></td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% else %}
-    <p class="page-sub">No chapters to write yet. Add a chapter from a research project.</p>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="pen" %}</span>
+      <p class="empty__title">No chapters found</p>
+      {% if query or status %}
+        <p class="empty__text">No chapter matches the current search and filters.</p>
+        <div class="empty__action">
+          <a class="btn btn--secondary" href="{% url 'writing:index' %}">Clear filters</a>
+        </div>
+      {% else %}
+        <p class="empty__text">Add a chapter from one of your research projects to start drafting.</p>
+      {% endif %}
+    </div>
   {% endif %}
 </section>
+
+{% include "partials/pagination.html" %}
 {% endblock %}

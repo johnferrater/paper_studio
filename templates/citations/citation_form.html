@@ -1,36 +1,50 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Add reference · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Add reference &middot; Paper Studio{% endblock %}
+{% block topbar_title %}References{% endblock %}
+{% block page_title %}Add reference{% endblock %}
+{% block page_sub %}{{ project.title }}{% endblock %}
+{% block page_actions %}
+  <a href="{{ project.get_absolute_url }}" class="btn btn--ghost">Back to project</a>
+{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Add reference</h1>
-    <p class="page-sub">{{ project.title }}</p>
-  </div>
-  <a href="{{ project.get_absolute_url }}" class="btn-outline">Back to project</a>
-</div>
-
-<section class="surface form-surface">
+<section class="card form-card">
   {% if form.fields.source.queryset.count %}
-    <form method="post" class="stack-form">
+    <form method="post">
       {% csrf_token %}
-      {% for field in form %}
-        <div class="form-field">
-          <label for="{{ field.id_for_label }}" class="login-label">{{ field.label }}</label>
-          {{ field }}
-          {% if field.errors %}<p class="field-error">{{ field.errors|join:" " }}</p>{% endif %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert--error mb-2" role="alert">
+          <span class="alert__icon">{% include "partials/icon.html" with name="alert" %}</span>
+          <p class="alert__text">{{ form.non_field_errors|join:" " }}</p>
         </div>
-      {% endfor %}
-      <div class="form-actions">
-        <button type="submit" class="btn-accent">Save reference</button>
-        <a href="{{ project.get_absolute_url }}" class="btn-outline">Cancel</a>
+      {% endif %}
+
+      <div class="stack">
+        {% for field in form %}
+          <div class="field">
+            <label class="label" for="{{ field.id_for_label }}">
+              {{ field.label }}{% if field.field.required %}<span class="required" aria-hidden="true">*</span>{% endif %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}<p class="field-help">{{ field.help_text|safe }}</p>{% endif %}
+            {% if field.errors %}<p class="field-error">{{ field.errors|join:" " }}</p>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="form-actions mt-3">
+        <button type="submit" class="btn btn--primary">Save reference</button>
+        <a href="{{ project.get_absolute_url }}" class="btn btn--ghost">Cancel</a>
       </div>
     </form>
   {% else %}
-    <p class="page-sub">Add a source to this project first, then come back to format a reference.</p>
-    <div class="form-actions">
-      <a href="{% url 'sources:source_create' project.pk %}" class="btn-accent">Add source</a>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="library" %}</span>
+      <p class="empty__title">No sources in this project</p>
+      <p class="empty__text">Add a source first — citations are generated from the sources saved in this project.</p>
+      <div class="empty__action">
+        <a href="{% url 'sources:source_create' project.pk %}" class="btn btn--primary">Add source</a>
+      </div>
     </div>
   {% endif %}
 </section>

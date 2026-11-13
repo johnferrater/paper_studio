@@ -1,19 +1,14 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Supervision · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Supervision &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Supervision{% endblock %}
+{% block page_title %}Supervision{% endblock %}
+{% block page_sub %}Teacher and student research pairings.{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Supervision</h1>
-    <p class="page-sub">Teacher and student research pairings</p>
-  </div>
-</div>
-
-<section class="surface">
+<section class="card">
   {% if supervisions %}
     <div class="table-wrap">
-      <table class="data-table">
+      <table class="table">
+        <caption class="sr-only">Supervision pairings</caption>
         <thead>
           <tr>
             <th scope="col">Teacher</th>
@@ -25,17 +20,29 @@
         <tbody>
           {% for supervision in supervisions %}
             <tr>
-              <td>{{ supervision.teacher.get_full_name|default:supervision.teacher.username }}</td>
+              <td class="table__primary">{{ supervision.teacher.get_full_name|default:supervision.teacher.username }}</td>
               <td>{{ supervision.student.get_full_name|default:supervision.student.username }}</td>
-              <td>{% if supervision.project %}<a class="btn-link" href="{{ supervision.project.get_absolute_url }}">{{ supervision.project.title }}</a>{% else %}—{% endif %}</td>
-              <td><span class="badge {% if supervision.status == 'ACTIVE' %}badge-green{% else %}badge-gray{% endif %}">{{ supervision.get_status_display }}</span></td>
+              <td>
+                {% if supervision.project %}
+                  <a href="{{ supervision.project.get_absolute_url }}">{{ supervision.project.title }}</a>
+                {% else %}
+                  <span class="table__muted">Unassigned</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge {% if supervision.status == 'ACTIVE' %}badge--green{% else %}badge--gray{% endif %}">{{ supervision.get_status_display }}</span>
+              </td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   {% else %}
-    <p class="page-sub">No supervision pairings yet.</p>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="users" %}</span>
+      <p class="empty__title">No supervision pairings</p>
+      <p class="empty__text">Teacher and student pairings appear here once a supervision record exists.</p>
+    </div>
   {% endif %}
 </section>
 {% endblock %}

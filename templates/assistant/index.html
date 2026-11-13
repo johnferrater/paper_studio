@@ -1,30 +1,33 @@
 {% extends "base_dashboard.html" %}
-{% block title %}AI Assistant · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}AI assistant &middot; Paper Studio{% endblock %}
+{% block topbar_title %}AI assistant{% endblock %}
+{% block page_title %}AI assistant{% endblock %}
+{% block page_sub %}Pick a project to chat with the writing assistant.{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">AI assistant</h1>
-    <p class="page-sub">Pick a project to chat with the writing assistant</p>
-  </div>
-</div>
-
-<section class="surface">
+<section class="card">
   {% if projects %}
-    <div class="list-divide">
+    <div class="list">
       {% for project in projects %}
-        <div class="list-row">
-          <div class="list-main">
-            <p class="list-title"><a class="btn-link" href="{% url 'assistant:chat' project.pk %}">{{ project.title }}</a></p>
-            <p class="list-sub">{{ project.chapters.count }} chapter{{ project.chapters.count|pluralize }}</p>
+        <div class="list__item">
+          <div class="list__main">
+            <p class="list__title"><a href="{% url 'assistant:chat' project.pk %}">{{ project.title }}</a></p>
+            <p class="list__sub">{{ project.chapters.count }} chapter{{ project.chapters.count|pluralize }}</p>
           </div>
-          <a href="{% url 'assistant:chat' project.pk %}" class="btn-link">Open chat</a>
+          <div class="list__actions">
+            <a href="{% url 'assistant:chat' project.pk %}" class="btn btn--secondary btn--sm">Open chat</a>
+          </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p class="page-sub">Create a research project first to use the assistant.</p>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="chat" %}</span>
+      <p class="empty__title">No projects yet</p>
+      <p class="empty__text">Create a research project first, then come back to chat with the assistant.</p>
+      <div class="empty__action">
+        <a href="{% url 'research:project_create' %}" class="btn btn--primary">Create project</a>
+      </div>
+    </div>
   {% endif %}
 </section>
 {% endblock %}

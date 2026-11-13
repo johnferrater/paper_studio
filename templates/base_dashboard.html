@@ -1,30 +1,80 @@
 {% extends "base.html" %}
+{% block body_class %}app-body{% endblock %}
 {% block body %}
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
 <div class="app-shell">
-  <aside class="app-sidebar">
-    <div>
-      <div class="app-brand">PAPER STUDIO</div>
-      <div class="app-role">{% block role %}{% endblock %}</div>
-      {% if unread_notifications %}
-        <div class="sidebar-note">{{ unread_notifications }} unread notification{{ unread_notifications|pluralize }}</div>
-      {% endif %}
-      <nav class="app-nav">{% block nav %}{% endblock %}</nav>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <a class="brand" href="{% url 'home' %}">
+        <span class="brand__mark" aria-hidden="true">PS</span>
+        <span class="brand__name">Paper Studio</span>
+      </a>
+      <button class="sidebar__close" type="button" data-nav-close aria-label="Close navigation">
+        {% include "partials/icon.html" with name="close" %}
+      </button>
     </div>
-    <div class="sidebar-footer">
-      <div class="sidebar-user">{{ request.user.get_full_name|default:request.user.username }}</div>
+
+    <div class="sidebar__body">
+      {% include "partials/nav.html" %}
+    </div>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <span class="avatar" aria-hidden="true">{{ request.user.get_full_name|default:request.user.username|first|upper }}</span>
+        <span class="sidebar__user-meta">
+          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          <span>{{ request.user.get_role_display }}</span>
+        </span>
+      </div>
       <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
-        <button type="submit" class="logout-link">Log out</button>
+        <button type="submit" class="btn btn--sm btn--block sidebar__signout">Sign out</button>
       </form>
     </div>
   </aside>
-  <main class="app-main">
-    {% if messages %}
-      {% for message in messages %}
-        <div class="login-alert" role="alert">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-    {% block content %}{% endblock %}
-  </main>
+
+  <div class="sidebar-backdrop" data-nav-close></div>
+
+  <div class="app-content">
+    <header class="topbar">
+      <button class="icon-btn topbar__menu" type="button" data-nav-open aria-controls="sidebar" aria-expanded="false" aria-label="Open navigation">
+        {% include "partials/icon.html" with name="menu" %}
+      </button>
+      <div class="topbar__context">
+        <p class="topbar__eyebrow">{{ request.user.get_role_display }} workspace</p>
+        <p class="topbar__title">{% block topbar_title %}{% endblock %}</p>
+      </div>
+      <div class="topbar__actions">
+        <a class="icon-btn" href="{% url 'notifications:list' %}" aria-label="Notifications{% if unread_notifications %} ({{ unread_notifications }} unread){% endif %}">
+          {% include "partials/icon.html" with name="bell" %}
+          {% if unread_notifications %}<span class="icon-btn__count">{{ unread_notifications }}</span>{% endif %}
+        </a>
+      </div>
+    </header>
+
+    <main class="main" id="main-content">
+      {% include "partials/flash.html" %}
+
+      {% block page_header %}
+      <div class="page-head">
+        <div class="page-head__text">
+          <h1 class="page-title">{% block page_title %}{% endblock %}</h1>
+          <p class="page-sub">{% block page_sub %}{% endblock %}</p>
+        </div>
+        <div class="page-actions">{% block page_actions %}{% endblock %}</div>
+      </div>
+      {% endblock %}
+
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <div class="footer__inner">
+        <span>&copy; {% now "Y" %} Paper Studio</span>
+        <span>Research workspace for students, teachers and advisers</span>
+      </div>
+    </footer>
+  </div>
 </div>
 {% endblock %}

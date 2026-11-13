@@ -1,29 +1,52 @@
 {% extends "base_dashboard.html" %}
-{% block title %}References · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}References &middot; Paper Studio{% endblock %}
+{% block topbar_title %}References{% endblock %}
+{% block page_title %}References{% endblock %}
+{% block page_sub %}Formatted citations across the projects you can see.{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">References</h1>
-    <p class="page-sub">Formatted citations across your projects</p>
-  </div>
-</div>
 
-<section class="surface">
+<form class="toolbar" method="get" role="search">
+  <div class="toolbar__search">
+    <label class="sr-only" for="id_q">Search references</label>
+    {% include "partials/icon.html" with name="search" %}
+    <input class="input" type="search" id="id_q" name="q" value="{{ query }}" placeholder="Search by title, author or project">
+  </div>
+  <button type="submit" class="btn btn--secondary">Search</button>
+  {% if query %}<a class="btn btn--ghost" href="{% url 'citations:citation_list' %}">Clear</a>{% endif %}
+</form>
+
+<section class="card">
   {% if citations %}
-    <div class="list-divide">
+    <div class="list">
       {% for citation in citations %}
-        <div class="list-row">
-          <div class="list-main">
-            <p class="list-title">{{ citation.formatted_text }}</p>
-            <p class="list-sub">{{ citation.get_style_display }} &middot; <a class="btn-link" href="{{ citation.project.get_absolute_url }}">{{ citation.project.title }}</a></p>
+        <div class="list__item">
+          <div class="list__main">
+            <p class="list__title">{{ citation.formatted_text }}</p>
+            <p class="list__sub">
+              {{ citation.get_style_display }} &middot; <a href="{{ citation.project.get_absolute_url }}">{{ citation.project.title }}</a>
+            </p>
+          </div>
+          <div class="list__actions">
+            <span class="badge badge--gray">{{ citation.get_style_display }}</span>
           </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p class="page-sub">No references yet. Add one from a research project.</p>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="quote" %}</span>
+      <p class="empty__title">No references found</p>
+      {% if query %}
+        <p class="empty__text">No reference matches “{{ query }}”. Try another term or clear the search.</p>
+        <div class="empty__action">
+          <a class="btn btn--secondary" href="{% url 'citations:citation_list' %}">Clear search</a>
+        </div>
+      {% else %}
+        <p class="empty__text">Add a citation from one of your research projects to build your bibliography.</p>
+      {% endif %}
+    </div>
   {% endif %}
 </section>
+
+{% include "partials/pagination.html" %}
 {% endblock %}

@@ -1,9 +1,11 @@
 from django import forms
 
+from apps.core.forms import StyledModelForm
+
 from .models import Citation
 
 
-class CitationForm(forms.ModelForm):
+class CitationForm(StyledModelForm):
     class Meta:
         model = Citation
         fields = ("source", "style")
@@ -12,5 +14,3 @@ class CitationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if project is not None:
             self.fields["source"].queryset = project.sources.all()
-        for field in self.fields.values():
-            field.widget.attrs.setdefault("class", "input")

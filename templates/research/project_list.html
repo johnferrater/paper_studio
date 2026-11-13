@@ -1,37 +1,84 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Research · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
-{% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Research</h1>
-    <p class="page-sub">Projects you own, advise, or collaborate on</p>
-  </div>
+{% block title %}Research &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Research{% endblock %}
+{% block page_title %}{% if request.user.role == "STUDENT" %}My research{% else %}Research projects{% endif %}{% endblock %}
+{% block page_sub %}Projects you own, advise or collaborate on.{% endblock %}
+{% block page_actions %}
   {% if request.user.role == "STUDENT" %}
-    <a href="{% url 'research:project_create' %}" class="btn-accent">New project</a>
+    <a href="{% url 'research:project_create' %}" class="btn btn--primary">
+      {% include "partials/icon.html" with name="plus" %}New project
+    </a>
   {% endif %}
-</div>
+{% endblock %}
+{% block content %}
 
-<section class="surface">
+<form class="toolbar" method="get" role="search">
+  <div class="toolbar__search">
+    <label class="sr-only" for="id_q">Search projects</label>
+    {% include "partials/icon.html" with name="search" %}
+    <input class="input" type="search" id="id_q" name="q" value="{{ query }}" placeholder="Search by title or owner">
+  </div>
+  <div class="toolbar__field">
+    <label class="sr-only" for="id_status">Filter by status</label>
+    <select class="input" id="id_status" name="status">
+      <option value="">All statuses</option>
+      {% for value, label in project_status_choices %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="toolbar__field">
+    <label class="sr-only" for="id_sort">Sort projects</label>
+    <select class="input" id="id_sort" name="sort">
+      <option value="updated" {% if sort == 'updated' %}selected{% endif %}>Recently updated</option>
+      <option value="title" {% if sort == 'title' %}selected{% endif %}>Title A–Z</option>
+      <option value="deadline" {% if sort == 'deadline' %}selected{% endif %}>Deadline</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn--secondary">Apply</button>
+  {% if query or status %}<a class="btn btn--ghost" href="{% url 'research:project_list' %}">Clear</a>{% endif %}
+</form>
+
+<section class="card">
   {% if projects %}
-    <div class="list-divide">
+    <div class="list">
       {% for project in projects %}
-        <div class="list-row">
-          <div class="list-main">
-            <p class="list-title"><a class="btn-link" href="{{ project.get_absolute_url }}">{{ project.title }}</a></p>
-            <p class="list-sub">
+        <div class="list__item">
+          <div class="list__main">
+            <p class="list__title"><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></p>
+            <p class="list__sub">
               Owner {{ project.owner.get_full_name|default:project.owner.username }}
               &middot; {{ project.chapters.count }} chapter{{ project.chapters.count|pluralize }}
               {% if project.deadline %}&middot; due {{ project.deadline }}{% endif %}
             </p>
           </div>
-          <span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span>
+          <div class="list__actions">
+            <span class="badge badge--{{ project.badge_class }}">{{ project.get_status_display }}</span>
+            <a href="{{ project.get_absolute_url }}" class="btn-link">Open</a>
+          </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p class="page-sub">No projects yet.</p>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="folder" %}</span>
+      <p class="empty__title">No projects found</p>
+      {% if query or status %}
+        <p class="empty__text">No project matches the current search and filters. Try a different term or clear the filters.</p>
+        <div class="empty__action">
+          <a class="btn btn--secondary" href="{% url 'research:project_list' %}">Clear filters</a>
+        </div>
+      {% else %}
+        <p class="empty__text">{% if request.user.role == "STUDENT" %}Create your first research project to start collecting sources and writing chapters.{% else %}Projects appear here once you are an owner, adviser or group member.{% endif %}</p>
+        {% if request.user.role == "STUDENT" %}
+          <div class="empty__action">
+            <a href="{% url 'research:project_create' %}" class="btn btn--primary">Create project</a>
+          </div>
+        {% endif %}
+      {% endif %}
+    </div>
   {% endif %}
 </section>
+
+{% include "partials/pagination.html" %}
 {% endblock %}

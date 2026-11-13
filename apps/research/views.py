@@ -1,4 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import CreateView, DetailView, ListView
@@ -9,14 +10,47 @@ from apps.core.permissions import StudentRequiredMixin
 from .forms import ChapterForm, ProjectForm
 from .models import Chapter, Project
 
+SORT_OPTIONS = ("updated", "title", "deadline")
+
 
 class ProjectListView(LoginRequiredMixin, ListView):
     model = Project
     template_name = "research/project_list.html"
     context_object_name = "projects"
+    paginate_by = 12
 
     def get_queryset(self):
-        return visible_projects(self.request.user)
+        queryset = visible_projects(self.request.user)
+
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query)
+                | Q(owner__username__icontains=query)
+                | Q(owner__first_name__icontains=query)
+                | Q(owner__last_name__icontains=query)
+            )
+
+        status = self.request.GET.get("status", "").strip()
+        if status in Project.Status.values:
+            queryset = queryset.filter(status=status)
+
+        sort = self.request.GET.get("sort", "updated")
+        if sort == "title":
+            queryset = queryset.order_by("title")
+        elif sort == "deadline":
+            queryset = queryset.order_by("deadline", "title")
+        else:
+            queryset = queryset.order_by("-updated_at")
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.request.GET.get("q", "").strip()
+        context["status"] = self.request.GET.get("status", "").strip()
+        context["sort"] = self.request.GET.get("sort", "updated")
+        context["project_status_choices"] = Project.Status.choices
+        return context
 
 
 class ProjectCreateView(StudentRequiredMixin, CreateView):

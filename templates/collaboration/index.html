@@ -1,46 +1,46 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Group workspace · Paper Studio{% endblock %}
-{% block role %}{{ request.user.role }}{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Group workspace &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Group workspace{% endblock %}
+{% block page_title %}Group workspace{% endblock %}
+{% block page_sub %}Join a project group or manage your memberships.{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Group workspace</h1>
-    <p class="page-sub">Join a project group or manage your memberships</p>
-  </div>
-</div>
-
-<section class="surface">
+<section class="card">
   {% if rows %}
-    <div class="list-divide">
+    <div class="list">
       {% for row in rows %}
-        <div class="list-row">
-          <div class="list-main">
-            <p class="list-title"><a class="btn-link" href="{{ row.project.get_absolute_url }}">{{ row.project.title }}</a></p>
-            <p class="list-sub">
+        <div class="list__item">
+          <div class="list__main">
+            <p class="list__title"><a href="{{ row.project.get_absolute_url }}">{{ row.project.title }}</a></p>
+            <p class="list__sub">
               Owner {{ row.project.owner.get_full_name|default:row.project.owner.username }}
               &middot; {{ row.member_count }} member{{ row.member_count|pluralize }}
             </p>
           </div>
-          <span class="badge {{ row.project.badge_class }}">{{ row.project.get_status_display }}</span>
-          {% if row.is_owner %}
-            <span class="badge badge-purple">Leader</span>
-          {% elif row.is_member %}
-            <form method="post" action="{% url 'collaboration:leave' row.project.pk %}">
-              {% csrf_token %}
-              <button type="submit" class="btn-link">Leave</button>
-            </form>
-          {% elif request.user.role == "STUDENT" %}
-            <form method="post" action="{% url 'collaboration:join' row.project.pk %}">
-              {% csrf_token %}
-              <button type="submit" class="btn-link">Join</button>
-            </form>
-          {% endif %}
+          <div class="list__actions">
+            <span class="badge badge--{{ row.project.badge_class }}">{{ row.project.get_status_display }}</span>
+            {% if row.is_owner %}
+              <span class="badge badge--indigo">Leader</span>
+            {% elif row.is_member %}
+              <form method="post" action="{% url 'collaboration:leave' row.project.pk %}" data-confirm="Leave {{ row.project.title }}? You will lose access to its chapters.">
+                {% csrf_token %}
+                <button type="submit" class="btn-link">Leave</button>
+              </form>
+            {% elif request.user.role == "STUDENT" %}
+              <form method="post" action="{% url 'collaboration:join' row.project.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn--secondary btn--sm">Join</button>
+              </form>
+            {% endif %}
+          </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <p class="page-sub">No projects available to join.</p>
+    <div class="empty">
+      <span class="empty__icon">{% include "partials/icon.html" with name="users" %}</span>
+      <p class="empty__title">No groups available</p>
+      <p class="empty__text">When a project is created on the platform it will be listed here so students can join.</p>
+    </div>
   {% endif %}
 </section>
 {% endblock %}

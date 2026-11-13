@@ -1,38 +1,37 @@
-{% extends "base.html" %}
-{% block title %}Create account · Paper Studio{% endblock %}
-{% block body %}
-<div class="login-shell">
-  <section class="login-hero">
-    <div class="login-hero-brand">PAPER STUDIO</div>
-    <div class="login-hero-body">
-      <h1>Start your research journey.</h1>
-      <p>Create a student account to plan projects, organize sources, and write with your group.</p>
-    </div>
-    <div class="login-hero-foot">Teacher accounts are created by an administrator</div>
-  </section>
+{% extends "accounts/auth_base.html" %}
+{% block title %}Create account &middot; Paper Studio{% endblock %}
+{% block auth_headline %}Start your research journey.{% endblock %}
+{% block auth_text %}Create a student account to plan projects, organise sources and write chapters with your group.{% endblock %}
+{% block auth_foot %}Teacher accounts are created by an administrator{% endblock %}
+{% block auth_card_class %}auth__card--wide{% endblock %}
+{% block auth_card %}
+  <form method="post">
+    {% csrf_token %}
+    <h2 class="auth__title">Create account</h2>
+    <p class="auth__subtitle">Sign up as a student.</p>
 
-  <section class="login-panel">
-    <form method="post" class="login-card">
-      {% csrf_token %}
-      <h2 class="login-title">Create account</h2>
-      <p class="login-sub">Sign up as a student.</p>
+    {% if form.non_field_errors %}
+      <div class="alert alert--error" role="alert">
+        <span class="alert__icon">{% include "partials/icon.html" with name="alert" %}</span>
+        <p class="alert__text">{{ form.non_field_errors|join:" " }}</p>
+      </div>
+    {% endif %}
 
-      {% if form.non_field_errors %}
-        <div class="login-alert" role="alert">{{ form.non_field_errors|join:" " }}</div>
-      {% endif %}
-
+    <div class="stack">
       {% for field in form %}
-        <div class="login-field">
-          <label for="{{ field.id_for_label }}" class="login-label">{{ field.label }}</label>
+        <div class="field">
+          <label class="label" for="{{ field.id_for_label }}">
+            {{ field.label }}{% if field.field.required %}<span class="required" aria-hidden="true">*</span>{% endif %}
+          </label>
           {{ field }}
           {% if field.help_text %}<p class="field-help">{{ field.help_text|safe }}</p>{% endif %}
           {% if field.errors %}<p class="field-error">{{ field.errors|join:" " }}</p>{% endif %}
         </div>
       {% endfor %}
+    </div>
 
-      <button type="submit" class="login-submit">Create account</button>
-      <p class="login-alt">Already have an account? <a href="{% url 'login' %}">Sign in</a>.</p>
-    </form>
-  </section>
-</div>
+    <button type="submit" class="btn btn--primary btn--lg btn--block mt-2">Create account</button>
+
+    <p class="auth__footer">Already have an account? <a href="{% url 'login' %}">Sign in</a>.</p>
+  </form>
 {% endblock %}

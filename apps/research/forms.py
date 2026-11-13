@@ -1,17 +1,8 @@
 from django import forms
 
+from apps.core.forms import StyledModelForm
+
 from .models import Chapter, Project
-
-
-class StyledModelForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            widget = field.widget
-            if widget.__class__.__name__ == "Textarea":
-                widget.attrs.setdefault("class", "textarea")
-            else:
-                widget.attrs.setdefault("class", "input")
 
 
 class ProjectForm(StyledModelForm):

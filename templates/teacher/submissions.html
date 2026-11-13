@@ -1,71 +1,102 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Student Submissions · Paper Studio{% endblock %}
-{% block role %}TEACHER{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Student submissions &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Review{% endblock %}
+{% block page_title %}Student submissions{% endblock %}
+{% block page_sub %}Chapters waiting for your review.{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Student Submissions</h1>
-    <p class="page-sub">Chapters waiting for your review</p>
-  </div>
-</div>
 
-<div class="submissions-grid">
-  <section class="surface">
-    <h2 class="card-title">Pending submissions ({{ chapters|length }})</h2>
+<div class="grid">
+  <section class="card span-5">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Queue</h2>
+        <p class="card__subtitle">{{ chapters|length }} chapter{{ chapters|length|pluralize }} awaiting feedback</p>
+      </div>
+    </div>
     {% if chapters %}
-      <div class="list-divide">
+      <div class="list">
         {% for chapter in chapters %}
-          <div class="list-row">
-            <div class="list-main">
-              <p class="list-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
-              <p class="list-sub">{{ chapter.project.title }} &middot; {{ chapter.project.owner.get_full_name|default:chapter.project.owner.username }}</p>
+          <div class="list__item">
+            <div class="list__main">
+              <p class="list__title">
+                <a href="{% url 'teacher_submissions' %}?chapter={{ chapter.pk }}">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</a>
+              </p>
+              <p class="list__sub">{{ chapter.project.title }} &middot; {{ chapter.project.owner.get_full_name|default:chapter.project.owner.username }}</p>
             </div>
-            <a class="btn-link" href="{% url 'teacher_submissions' %}?chapter={{ chapter.pk }}">Review</a>
+            <div class="list__actions">
+              {% if selected.pk == chapter.pk %}<span class="badge badge--indigo">Open</span>{% endif %}
+            </div>
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="page-sub">Nothing waiting for review.</p>
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="check" %}</span>
+        <p class="empty__title">Queue is clear</p>
+        <p class="empty__text">Nothing is waiting for review right now.</p>
+      </div>
     {% endif %}
   </section>
 
-  <section class="surface">
-    <h2 class="card-title">Review</h2>
+  <section class="card span-7">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Review</h2>
+        {% if selected %}
+          <p class="card__subtitle">
+            Chapter {{ selected.number }} &middot; {{ selected.title }} &middot; {{ selected.project.title }}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+
     {% if selected %}
-      <p class="review-meta">Chapter {{ selected.number }} &middot; {{ selected.title }} &middot; {{ selected.project.title }}</p>
       {% if draft and draft.submitted_at %}
-        <p class="review-meta">Submitted {{ draft.submitted_at|date:"M j, Y H:i" }} by {{ selected.project.owner.get_full_name|default:selected.project.owner.username }}</p>
+        <p class="field-help">
+          Submitted {{ draft.submitted_at|date:"M j, Y H:i" }} by {{ selected.project.owner.get_full_name|default:selected.project.owner.username }}
+        </p>
       {% endif %}
-      <div class="locked-snapshot" style="white-space: pre-line;">{% if draft %}{{ draft.content }}{% else %}No draft text submitted.{% endif %}</div>
-      <form method="post">
+
+      <pre class="snapshot mt-2">{% if draft %}{{ draft.content }}{% else %}No draft text submitted.{% endif %}</pre>
+
+      <form method="post" class="mt-3">
         {% csrf_token %}
         <input type="hidden" name="chapter" value="{{ selected.pk }}">
-        <label for="feedback" class="sr-only">Write feedback</label>
-        <textarea id="feedback" name="feedback" class="textarea" placeholder="Write feedback"></textarea>
-        <div class="review-actions">
-          <button type="submit" name="decision" value="APPROVED" class="btn-accent">Approve</button>
-          <button type="submit" name="decision" value="REVISION" class="btn-outline">Request revision</button>
+        <div class="field">
+          <label class="label" for="feedback">Feedback</label>
+          <textarea id="feedback" name="feedback" class="textarea" placeholder="Summarise what is working and what needs work."></textarea>
+          <p class="field-help">The student sees this feedback together with your decision.</p>
+        </div>
+        <div class="form-actions mt-2">
+          <button type="submit" name="decision" value="APPROVED" class="btn btn--primary" data-confirm="Approve this chapter? The student will be notified." data-loading-label="Saving…">Approve</button>
+          <button type="submit" name="decision" value="REVISION" class="btn btn--secondary" data-confirm="Request a revision? The student will be asked to update the chapter." data-loading-label="Saving…">Request revision</button>
         </div>
       </form>
+
       {% if reviews %}
-        <div class="meta-list">
+        <div class="divider"></div>
+        <h3 class="section-title">Previous feedback</h3>
+        <div class="timeline">
           {% for review in reviews %}
-            <div class="history-row">
-              <div class="history-head">
-                <span class="badge {% if review.decision == 'APPROVED' %}badge-green{% else %}badge-red{% endif %}">{{ review.get_decision_display }}</span>
+            <div class="timeline__item">
+              <div class="timeline__head">
+                <span class="badge {% if review.decision == 'APPROVED' %}badge--green{% else %}badge--red{% endif %}">{{ review.get_decision_display }}</span>
                 <strong>{{ review.reviewer.get_full_name|default:review.reviewer.username }}</strong>
-                <span class="list-sub">{{ review.created_at|date:"M j, Y H:i" }}</span>
+                <span class="timeline__time">{{ review.created_at|date:"M j, Y H:i" }}</span>
               </div>
               {% if review.feedback %}
-                <p class="page-sub">{{ review.feedback|linebreaksbr }}</p>
+                <p class="timeline__body">{{ review.feedback|linebreaksbr }}</p>
               {% endif %}
             </div>
           {% endfor %}
         </div>
       {% endif %}
     {% else %}
-      <p class="page-sub">Select a submission on the left to review it.</p>
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="inbox" %}</span>
+        <p class="empty__title">Select a submission</p>
+        <p class="empty__text">Choose a chapter from the queue to read the text and leave feedback.</p>
+      </div>
     {% endif %}
   </section>
 </div>

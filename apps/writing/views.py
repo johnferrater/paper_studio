@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -21,13 +22,31 @@ EDITABLE_STATUSES = {Chapter.Status.DRAFT, Chapter.Status.REVISION}
 class WritingIndexView(LoginRequiredMixin, ListView):
     template_name = "writing/index.html"
     context_object_name = "chapters"
+    paginate_by = 15
 
     def get_queryset(self):
-        return (
-            Chapter.objects.filter(project__in=visible_projects(self.request.user))
-            .select_related("project")
-            .prefetch_related("drafts")
-        )
+        queryset = Chapter.objects.filter(
+            project__in=visible_projects(self.request.user)
+        ).select_related("project")
+
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) | Q(project__title__icontains=query)
+            )
+
+        status = self.request.GET.get("status", "").strip()
+        if status in Chapter.Status.values:
+            queryset = queryset.filter(status=status)
+
+        return queryset.order_by("project__title", "number")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["query"] = self.request.GET.get("q", "").strip()
+        context["status"] = self.request.GET.get("status", "").strip()
+        context["chapter_status_choices"] = Chapter.Status.choices
+        return context
 
 
 @login_required

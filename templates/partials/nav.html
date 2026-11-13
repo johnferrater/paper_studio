@@ -1,37 +1,114 @@
 {% url 'student_dashboard' as student_home %}
 {% url 'teacher_dashboard' as teacher_home %}
 {% url 'admin_dashboard' as admin_home %}
+{% url 'teacher_submissions' as teacher_submissions_url %}
 {% url 'research:project_list' as research_list %}
-{% url 'collaboration:index' as collab_index %}
+{% url 'collaboration:index' as collaboration_index %}
 {% url 'assistant:index' as assistant_index %}
 {% url 'sources:source_list' as source_list %}
 {% url 'citations:citation_list' as citation_list %}
 {% url 'writing:index' as writing_index %}
 {% url 'notifications:list' as notifications_list %}
 {% url 'analytics:dashboard' as analytics_dashboard %}
-{% url 'teacher_submissions' as submissions %}
 {% url 'admin:index' as django_admin %}
 
 {% if request.user.role == "STUDENT" %}
-  <a class="nav-link {% if request.resolver_match.view_name == 'student_dashboard' %}active{% endif %}" href="{{ student_home }}">Overview</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'research:project_list' %}active{% endif %}" href="{{ research_list }}">My Research</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'collaboration:index' %}active{% endif %}" href="{{ collab_index }}">Group Workspace</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'assistant:index' %}active{% endif %}" href="{{ assistant_index }}">AI Assistant</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'sources:source_list' %}active{% endif %}" href="{{ source_list }}">Source Finder</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'writing:index' %}active{% endif %}" href="{{ writing_index }}">Writing Workspace</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'citations:citation_list' %}active{% endif %}" href="{{ citation_list }}">References</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'notifications:list' %}active{% endif %}" href="{{ notifications_list }}">Notifications</a>
+  <p class="sidebar__section">Workspace</p>
+  <nav class="nav" aria-label="Workspace">
+    <a class="nav__link {% if request.resolver_match.view_name == 'student_dashboard' %}is-active{% endif %}" href="{{ student_home }}" {% if request.resolver_match.view_name == 'student_dashboard' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="grid" %}
+      <span class="nav__label">Overview</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'research' %}is-active{% endif %}" href="{{ research_list }}" {% if request.resolver_match.namespace == 'research' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="folder" %}
+      <span class="nav__label">My research</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'collaboration' %}is-active{% endif %}" href="{{ collaboration_index }}" {% if request.resolver_match.namespace == 'collaboration' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="users" %}
+      <span class="nav__label">Group workspace</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'writing' %}is-active{% endif %}" href="{{ writing_index }}" {% if request.resolver_match.namespace == 'writing' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="pen" %}
+      <span class="nav__label">Writing workspace</span>
+    </a>
+  </nav>
+
+  <p class="sidebar__section">Research tools</p>
+  <nav class="nav" aria-label="Research tools">
+    <a class="nav__link {% if request.resolver_match.namespace == 'assistant' %}is-active{% endif %}" href="{{ assistant_index }}" {% if request.resolver_match.namespace == 'assistant' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="chat" %}
+      <span class="nav__label">AI assistant</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'sources' %}is-active{% endif %}" href="{{ source_list }}" {% if request.resolver_match.namespace == 'sources' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="library" %}
+      <span class="nav__label">Source finder</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'citations' %}is-active{% endif %}" href="{{ citation_list }}" {% if request.resolver_match.namespace == 'citations' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="quote" %}
+      <span class="nav__label">References</span>
+    </a>
+  </nav>
+
 {% elif request.user.role == "TEACHER" %}
-  <a class="nav-link {% if request.resolver_match.view_name == 'teacher_dashboard' %}active{% endif %}" href="{{ teacher_home }}">Overview</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'research:project_list' %}active{% endif %}" href="{{ research_list }}">Assigned Projects</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'teacher_submissions' %}active{% endif %}" href="{{ submissions }}">Student Submissions</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'writing:index' %}active{% endif %}" href="{{ writing_index }}">Chapter Reviews</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'analytics:dashboard' %}active{% endif %}" href="{{ analytics_dashboard }}">Research Progress</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'notifications:list' %}active{% endif %}" href="{{ notifications_list }}">Notifications</a>
+  <p class="sidebar__section">Workspace</p>
+  <nav class="nav" aria-label="Workspace">
+    <a class="nav__link {% if request.resolver_match.view_name == 'teacher_dashboard' %}is-active{% endif %}" href="{{ teacher_home }}" {% if request.resolver_match.view_name == 'teacher_dashboard' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="grid" %}
+      <span class="nav__label">Overview</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'research' %}is-active{% endif %}" href="{{ research_list }}" {% if request.resolver_match.namespace == 'research' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="folder" %}
+      <span class="nav__label">Assigned projects</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.view_name == 'teacher_submissions' %}is-active{% endif %}" href="{{ teacher_submissions_url }}" {% if request.resolver_match.view_name == 'teacher_submissions' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="inbox" %}
+      <span class="nav__label">Student submissions</span>
+    </a>
+  </nav>
+
+  <p class="sidebar__section">Review</p>
+  <nav class="nav" aria-label="Review">
+    <a class="nav__link {% if request.resolver_match.namespace == 'writing' %}is-active{% endif %}" href="{{ writing_index }}" {% if request.resolver_match.namespace == 'writing' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="pen" %}
+      <span class="nav__label">Chapter reviews</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'analytics' %}is-active{% endif %}" href="{{ analytics_dashboard }}" {% if request.resolver_match.namespace == 'analytics' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="chart" %}
+      <span class="nav__label">Research progress</span>
+    </a>
+  </nav>
+
 {% else %}
-  <a class="nav-link {% if request.resolver_match.view_name == 'admin_dashboard' %}active{% endif %}" href="{{ admin_home }}">Overview</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'research:project_list' %}active{% endif %}" href="{{ research_list }}">Research</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'analytics:dashboard' %}active{% endif %}" href="{{ analytics_dashboard }}">Analytics</a>
-  <a class="nav-link" href="{{ django_admin }}">User Management</a>
-  <a class="nav-link {% if request.resolver_match.view_name == 'notifications:list' %}active{% endif %}" href="{{ notifications_list }}">Notifications</a>
+  <p class="sidebar__section">Workspace</p>
+  <nav class="nav" aria-label="Workspace">
+    <a class="nav__link {% if request.resolver_match.view_name == 'admin_dashboard' %}is-active{% endif %}" href="{{ admin_home }}" {% if request.resolver_match.view_name == 'admin_dashboard' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="grid" %}
+      <span class="nav__label">Overview</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'research' %}is-active{% endif %}" href="{{ research_list }}" {% if request.resolver_match.namespace == 'research' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="folder" %}
+      <span class="nav__label">Research</span>
+    </a>
+    <a class="nav__link {% if request.resolver_match.namespace == 'analytics' %}is-active{% endif %}" href="{{ analytics_dashboard }}" {% if request.resolver_match.namespace == 'analytics' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="chart" %}
+      <span class="nav__label">Analytics</span>
+    </a>
+  </nav>
+
+  <p class="sidebar__section">Administration</p>
+  <nav class="nav" aria-label="Administration">
+    <a class="nav__link {% if request.resolver_match.namespace == 'admin' %}is-active{% endif %}" href="{{ django_admin }}" {% if request.resolver_match.namespace == 'admin' %}aria-current="page"{% endif %}>
+      {% include "partials/icon.html" with name="shield" %}
+      <span class="nav__label">User management</span>
+    </a>
+  </nav>
 {% endif %}
+
+<p class="sidebar__section">Activity</p>
+<nav class="nav" aria-label="Activity">
+  <a class="nav__link {% if request.resolver_match.namespace == 'notifications' %}is-active{% endif %}" href="{{ notifications_list }}" {% if request.resolver_match.namespace == 'notifications' %}aria-current="page"{% endif %}>
+    {% include "partials/icon.html" with name="bell" %}
+    <span class="nav__label">Notifications</span>
+    {% if unread_notifications %}<span class="nav__count">{{ unread_notifications }}</span>{% endif %}
+  </a>
+</nav>

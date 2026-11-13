@@ -12,7 +12,8 @@ class ChapterDraftForm(forms.ModelForm):
                 attrs={
                     "class": "textarea",
                     "rows": 16,
-                    "placeholder": "Write your chapter here...",
+                    "placeholder": "Write your chapter here…",
+                    "data-word-count": "word-count",
                 }
             )
         }

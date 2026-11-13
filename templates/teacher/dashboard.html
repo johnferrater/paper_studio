@@ -1,19 +1,78 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Teacher · Paper Studio{% endblock %}
-{% block role %}TEACHER{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Overview &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block page_sub %}Your classes and review queue at a glance.{% endblock %}
+{% block page_actions %}
+  <a href="{% url 'teacher_submissions' %}" class="btn btn--primary">
+    {% include "partials/icon.html" with name="inbox" %}Review submissions
+  </a>
+{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Overview</h1>
-    <p class="page-sub">Your classes at a glance</p>
+
+<div class="stat-grid mb-2">
+  <div class="stat">
+    <p class="stat__label">Assigned projects</p>
+    <p class="stat__value">{{ project_count }}</p>
+    <p class="stat__hint">Projects you advise</p>
   </div>
-  <a href="{% url 'research:project_list' %}" class="btn-accent">Assigned projects</a>
+  <div class="stat">
+    <p class="stat__label">Students</p>
+    <p class="stat__value">{{ student_count }}</p>
+    <p class="stat__hint">Owners and group members</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Pending reviews</p>
+    <p class="stat__value">{{ pending_count }}</p>
+    <p class="stat__hint">Chapters awaiting feedback</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Unread</p>
+    <p class="stat__value">{{ unread_notifications }}</p>
+    <p class="stat__hint">New notifications</p>
+  </div>
 </div>
 
-<div class="overview-grid">
-  <section class="surface span-5">
-    <h2 class="card-title">Class summary</h2>
+<div class="grid">
+  <section class="card span-7">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Pending submissions</h2>
+        <p class="card__subtitle">Chapters waiting for your feedback</p>
+      </div>
+      <a href="{% url 'teacher_submissions' %}" class="card__link">Review all</a>
+    </div>
+    {% if pending_chapters %}
+      <div class="list">
+        {% for chapter in pending_chapters %}
+          <div class="list__item">
+            <div class="list__main">
+              <p class="list__title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
+              <p class="list__sub">{{ chapter.project.title }} &middot; {{ chapter.project.owner.get_full_name|default:chapter.project.owner.username }}</p>
+            </div>
+            <div class="list__actions">
+              <span class="badge badge--{{ chapter.badge_class }}">{{ chapter.get_status_display }}</span>
+              <a href="{% url 'teacher_submissions' %}?chapter={{ chapter.pk }}" class="btn-link">Review</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="check" %}</span>
+        <p class="empty__title">Nothing waiting for review</p>
+        <p class="empty__text">When a student submits a chapter it will appear here for feedback.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="card span-5">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Class summary</h2>
+        <p class="card__subtitle">Current workload</p>
+      </div>
+    </div>
     <div class="meta-list">
       <div class="meta-row">
         <span class="meta-label">Assigned projects</span>
@@ -28,39 +87,23 @@
         <span class="meta-value">{{ pending_count }}</span>
       </div>
     </div>
-  </section>
-
-  <section class="surface span-7">
-    <div class="card-head">
-      <h2 class="card-title">Pending submissions</h2>
-      <a href="{% url 'teacher_submissions' %}" class="card-link">Review all</a>
+    <div class="form-actions mt-2">
+      <a href="{% url 'analytics:dashboard' %}" class="btn btn--secondary">Research progress</a>
     </div>
-    {% if pending_chapters %}
-      <div class="list-divide">
-        {% for chapter in pending_chapters %}
-          <div class="list-row">
-            <div class="list-main">
-              <p class="list-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
-              <p class="list-sub">{{ chapter.project.title }}</p>
-            </div>
-            <span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span>
-            <a href="{% url 'teacher_submissions' %}?chapter={{ chapter.pk }}" class="btn-link">Review</a>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p class="page-sub">Nothing waiting for review.</p>
-    {% endif %}
   </section>
 
-  <section class="surface span-7">
-    <div class="card-head">
-      <h2 class="card-title">Assigned projects</h2>
-      <a href="{% url 'research:project_list' %}" class="card-link">View all</a>
+  <section class="card span-7">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Assigned projects</h2>
+        <p class="card__subtitle">Recent activity across your classes</p>
+      </div>
+      <a href="{% url 'research:project_list' %}" class="card__link">View all</a>
     </div>
     {% if projects %}
       <div class="table-wrap">
-        <table class="data-table">
+        <table class="table">
+          <caption class="sr-only">Projects you advise</caption>
           <thead>
             <tr>
               <th scope="col">Project</th>
@@ -72,24 +115,31 @@
           <tbody>
             {% for project in projects %}
               <tr>
-                <td><a class="btn-link" href="{{ project.get_absolute_url }}">{{ project.title }}</a></td>
-                <td>{{ project.owner.get_full_name|default:project.owner.username }}</td>
-                <td><span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span></td>
-                <td>{{ project.deadline|default:"—" }}</td>
+                <td class="table__primary"><a href="{{ project.get_absolute_url }}">{{ project.title }}</a></td>
+                <td class="table__muted">{{ project.owner.get_full_name|default:project.owner.username }}</td>
+                <td><span class="badge badge--{{ project.badge_class }}">{{ project.get_status_display }}</span></td>
+                <td class="table__muted">{{ project.deadline|default:"Not set" }}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     {% else %}
-      <p class="page-sub">No projects have been assigned to you yet.</p>
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="folder" %}</span>
+        <p class="empty__title">No projects assigned</p>
+        <p class="empty__text">Projects appear here once you are set as the adviser.</p>
+      </div>
     {% endif %}
   </section>
 
-  <section class="surface span-5">
-    <div class="card-head">
-      <h2 class="card-title">Notifications</h2>
-      <a href="{% url 'notifications:list' %}" class="card-link">View all</a>
+  <section class="card span-5">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Notifications</h2>
+        <p class="card__subtitle">Latest activity</p>
+      </div>
+      <a href="{% url 'notifications:list' %}" class="card__link">View all</a>
     </div>
     {% include "partials/notification_list.html" %}
   </section>

@@ -1,38 +1,68 @@
 {% extends "base_dashboard.html" %}
-{% block title %}Student · Paper Studio{% endblock %}
-{% block role %}STUDENT{% endblock %}
-{% block nav %}{% include "partials/nav.html" %}{% endblock %}
+{% block title %}Overview &middot; Paper Studio{% endblock %}
+{% block topbar_title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block page_sub %}Welcome back{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}. Here is where your research stands today.{% endblock %}
+{% block page_actions %}
+  <a href="{% url 'research:project_create' %}" class="btn btn--primary">
+    {% include "partials/icon.html" with name="plus" %}New research project
+  </a>
+{% endblock %}
 {% block content %}
-<div class="page-head">
-  <div>
-    <h1 class="page-title">Overview</h1>
-    <p class="page-sub">Your research at a glance &middot; {{ project_count }} project{{ project_count|pluralize }}</p>
-  </div>
-  <a href="{% url 'research:project_create' %}" class="btn-accent">New research project</a>
-</div>
 
 {% if revision_count %}
-  <div class="revision-banner">
-    <div>
-      <strong>Revision required &middot; {{ revision_count }} chapter{{ revision_count|pluralize }}</strong>
-      <p class="page-sub">Your adviser returned these chapters. Open them to read the feedback and resubmit.</p>
-    </div>
-    <div class="quick-actions">
-      {% for chapter in revision_chapters %}
-        <a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn-outline">{{ chapter.project.title }} &middot; Ch {{ chapter.number }}</a>
-      {% endfor %}
+  <div class="callout mb-2">
+    <span class="callout__icon">{% include "partials/icon.html" with name="alert" %}</span>
+    <div class="callout__body">
+      <p class="callout__title">Revision required on {{ revision_count }} chapter{{ revision_count|pluralize }}</p>
+      <p class="callout__text">Your adviser returned these chapters. Open each one to read the feedback, update the text and resubmit.</p>
+      <div class="callout__actions">
+        {% for chapter in revision_chapters %}
+          <a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn btn--secondary btn--sm">{{ chapter.project.title }} &middot; Ch {{ chapter.number }}</a>
+        {% endfor %}
+      </div>
     </div>
   </div>
 {% endif %}
 
-<div class="overview-grid">
-  <section class="surface span-5">
-    <h2 class="card-title">Current project</h2>
+<div class="stat-grid mb-2">
+  <div class="stat">
+    <p class="stat__label">Projects</p>
+    <p class="stat__value">{{ project_count }}</p>
+    <p class="stat__hint">Owned or shared with you</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Chapters</p>
+    <p class="stat__value">{{ chapter_count }}</p>
+    <p class="stat__hint">Across all your projects</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Needs revision</p>
+    <p class="stat__value">{{ revision_count }}</p>
+    <p class="stat__hint">Waiting on your changes</p>
+  </div>
+  <div class="stat">
+    <p class="stat__label">Unread</p>
+    <p class="stat__value">{{ unread_notifications }}</p>
+    <p class="stat__hint">New notifications</p>
+  </div>
+</div>
+
+<div class="grid">
+  <section class="card span-5">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Current project</h2>
+        <p class="card__subtitle">Your most recently updated project</p>
+      </div>
+    </div>
     {% with project=projects.0 %}
       {% if project %}
-        <h3 class="project-title"><a class="btn-link" href="{{ project.get_absolute_url }}">{{ project.title }}</a></h3>
-        <span class="badge {{ project.badge_class }}">{{ project.get_status_display }}</span>
-        <div class="meta-list">
+        <p class="list__title list__title--lg">
+          <a href="{{ project.get_absolute_url }}">{{ project.title }}</a>
+        </p>
+        <p class="mt-1"><span class="badge badge--{{ project.badge_class }}">{{ project.get_status_display }}</span></p>
+        <div class="meta-list mt-2">
           <div class="meta-row">
             <span class="meta-label">Adviser</span>
             <span class="meta-value">{{ project.adviser.get_full_name|default:project.adviser.username|default:"Unassigned" }}</span>
@@ -46,53 +76,78 @@
             <span class="meta-value">{{ project.deadline|default:"Not set" }}</span>
           </div>
         </div>
+        <div class="form-actions mt-2">
+          <a href="{{ project.get_absolute_url }}" class="btn btn--secondary">Open project</a>
+          <a href="{% url 'writing:index' %}" class="btn btn--ghost">Writing workspace</a>
+        </div>
       {% else %}
-        <p class="page-sub">You have no project yet. Create one to start your research.</p>
-        <div class="form-actions">
-          <a href="{% url 'research:project_create' %}" class="btn-accent">Create project</a>
+        <div class="empty">
+          <span class="empty__icon">{% include "partials/icon.html" with name="folder" %}</span>
+          <p class="empty__title">No projects yet</p>
+          <p class="empty__text">Create your first research project to start collecting sources and writing chapters.</p>
+          <div class="empty__action">
+            <a href="{% url 'research:project_create' %}" class="btn btn--primary">Create project</a>
+          </div>
         </div>
       {% endif %}
     {% endwith %}
   </section>
 
-  <section class="surface span-7">
-    <div class="card-head">
-      <h2 class="card-title">Chapters</h2>
-      <a href="{% url 'writing:index' %}" class="card-link">Writing workspace</a>
+  <section class="card span-7">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Chapters</h2>
+        <p class="card__subtitle">Draft, review and submission status</p>
+      </div>
+      <a href="{% url 'writing:index' %}" class="card__link">Writing workspace</a>
     </div>
     {% if chapters %}
-      <div class="list-divide">
+      <div class="list">
         {% for chapter in chapters %}
-          <div class="list-row">
-            <div class="list-main">
-              <p class="list-title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
-              <p class="list-sub">{{ chapter.project.title }}</p>
+          <div class="list__item">
+            <div class="list__main">
+              <p class="list__title">Chapter {{ chapter.number }} &middot; {{ chapter.title }}</p>
+              <p class="list__sub">{{ chapter.project.title }}</p>
             </div>
-            <span class="badge {{ chapter.badge_class }}">{{ chapter.get_status_display }}</span>
-            <a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn-link">Write</a>
+            <div class="list__actions">
+              <span class="badge badge--{{ chapter.badge_class }}">{{ chapter.get_status_display }}</span>
+              <a href="{% url 'writing:chapter_edit' chapter.pk %}" class="btn-link">Open</a>
+            </div>
           </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="page-sub">No chapters yet. Add one from your project page.</p>
+      <div class="empty">
+        <span class="empty__icon">{% include "partials/icon.html" with name="pen" %}</span>
+        <p class="empty__title">No chapters yet</p>
+        <p class="empty__text">Add a chapter from your project page to start drafting.</p>
+      </div>
     {% endif %}
   </section>
 
-  <section class="surface span-7">
-    <h2 class="card-title">Quick actions</h2>
-    <div class="quick-actions">
-      <a href="{% url 'research:project_list' %}" class="btn-outline">My research</a>
-      <a href="{% url 'sources:source_list' %}" class="btn-outline">Sources</a>
-      <a href="{% url 'citations:citation_list' %}" class="btn-outline">References</a>
-      <a href="{% url 'collaboration:index' %}" class="btn-outline">Group workspace</a>
-      <a href="{% url 'assistant:index' %}" class="btn-outline">AI assistant</a>
+  <section class="card span-7">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Quick actions</h2>
+        <p class="card__subtitle">Jump straight into your most common tasks</p>
+      </div>
+    </div>
+    <div class="row">
+      <a href="{% url 'research:project_list' %}" class="btn btn--secondary">My research</a>
+      <a href="{% url 'sources:source_list' %}" class="btn btn--secondary">Sources</a>
+      <a href="{% url 'citations:citation_list' %}" class="btn btn--secondary">References</a>
+      <a href="{% url 'collaboration:index' %}" class="btn btn--secondary">Group workspace</a>
+      <a href="{% url 'assistant:index' %}" class="btn btn--secondary">AI assistant</a>
     </div>
   </section>
 
-  <section class="surface span-5">
-    <div class="card-head">
-      <h2 class="card-title">Notifications</h2>
-      <a href="{% url 'notifications:list' %}" class="card-link">View all</a>
+  <section class="card span-5">
+    <div class="card__header">
+      <div>
+        <h2 class="card__title">Notifications</h2>
+        <p class="card__subtitle">Latest activity on your projects</p>
+      </div>
+      <a href="{% url 'notifications:list' %}" class="card__link">View all</a>
     </div>
     {% include "partials/notification_list.html" %}
   </section>

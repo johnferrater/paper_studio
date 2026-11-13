@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block body_class %}auth-body{% endblock %}
+{% block body %}
+<div class="auth">
+  <aside class="auth__aside">
+    <p class="auth__brand">
+      <span class="brand__mark" aria-hidden="true">PS</span>
+      <span>Paper Studio</span>
+    </p>
+    <div>
+      <h1 class="auth__headline">{% block auth_headline %}{% endblock %}</h1>
+      <p class="auth__text">{% block auth_text %}{% endblock %}</p>
+    </div>
+    <p class="auth__foot">{% block auth_foot %}{% endblock %}</p>
+  </aside>
+
+  <main class="auth__main">
+    <div class="auth__card {% block auth_card_class %}{% endblock %}">
+      <div class="auth__brand-mobile">
+        <span class="brand">
+          <span class="brand__mark" aria-hidden="true">PS</span>
+          <span>Paper Studio</span>
+        </span>
+      </div>
+      {% block auth_card %}{% endblock %}
+    </div>
+  </main>
+</div>
+{% endblock %}
